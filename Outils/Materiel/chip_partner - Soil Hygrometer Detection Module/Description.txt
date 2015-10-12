@@ -1,0 +1,21 @@
+1. This is a simple water sensor can be used to detect soil moisture when the soil moisture deficit module outputs a high level, and vice versa output low. Use this sensor produced an automatic plant waterer device, so that the plants in your garden without people to manage. 
+2. Sensitivity adjustable the blue digital potentiometer adjustment (Figure) 
+3. Operating voltage 3.3V-5V 
+4. Module dual output mode, digital output, analog output more accurate. 
+5. With fixed bolt hole for easy installation 
+6. PCB size: 3cm * 1.6cm 
+7. Power indicator (red) and digital switching output indicator (green) 
+8. Comparator LM393 chip, stable
+
+Interface Description (4-wire) 
+1. VCC: .3 V-5V 
+2. GND: GND 
+3. DO: digital output interface (0 and 1) 
+4. AO: Analog Output Interface
+
+Instructions for use :
+1. Soil moisture module is most sensitive to the ambient humidity is generally used to detect the moisture content of the soil. 
+2. Module to reach the threshold value is set in the soil moisture, DO port output high, when the the soil humidity exceeds a set threshold value, the module D0 output low; 
+3. The digital output D0 can be connected directly with the microcontroller to detect high and low by the microcontroller to detect soil moisture; 
+4. The digital outputs DO shop relay module can directly drive the buzzer module, which can form a soil moisture alarm equipment; 
+5. Analog output AO and AD module connected through the AD converter, you can get more precise values of soil moisture

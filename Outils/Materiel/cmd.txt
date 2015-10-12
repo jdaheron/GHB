@@ -1,0 +1,32 @@
+																											PU			QTT		PT
+
+Olimex:
+  - MOD-LTR-501ALS																							12.95€		1		12.95
+  - MOD-TC																									 7.95€		1		 7.95
+  - TC-K-TYPE																								 2.95€		1		 2.95
+  - UEXTx5 1 pcs																							 1.95€		1		 1.95
+  - AIRMAIL - EUROPE																						 4.13€		1		 4.13
+  - PayPal Service Charge 5 %																				 1.50€		1		 1.95
+  	DELAIS	23/09 à 30/09																								TOTAL	37.72																															
+
+ebay (chip_partner):
+  - 5V 4-Channel Relay Module with Optocoupler High Level Triger for Arduino (121310782896)	 				 5.46$		1		 4.35
+  - Electric Solenoid Valve 12-Volt DC, Air, Water (400735385044)											15.76$		2		12.56
+  - 5PCS Soil Hygrometer Detection Module Soil Moisture Sensor For arduino Smart car (400444403468)			 7.93$		1		 6.32
+	DELAIS	26/09 à 14/10																								TOTAL	23.24	
+								
+  
+ebay (axeprice.cs):
+  - 1pcs New USB 2.0 to TTL UART Module 5pin Serial Converter CP2102 STC 5pin cables (400524483249)			 1.98$		3		 4.74
+	DELAIS	29/09 à 15/10																								TOTAL	 4.74																															
+																														
+																														
+ebay (chip_partner):
+  - ST-Link V2 mini STM8 STM32 Emulator Downloader Programming Unit(Random Color) (121382669906)			 4.66$		2		 7.43
+	DELAIS	29/09 à 15/10																								TOTAL	 7.43
+  
+ebay (chip_partner):
+  - 2pcs DHT22 AM2302 Digital Temperature and Humidity Sensor module										14.54$		1		11.65
+  DELAIS	01/10 à 17/10																								TOTAL	11.65
+  
+  

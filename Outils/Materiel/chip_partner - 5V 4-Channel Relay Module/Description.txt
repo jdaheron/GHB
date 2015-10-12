@@ -1,0 +1,15 @@
+Module description:
+1. Maximum load on normally open pin: AC 250V/10A, DC 30V/10A.
+2. Trigger current 5mA;
+3. Power indicator light (green), relay status indicator light (red);
+4. Module size: 72x45x18.5mm.
+
+Module interface specifications:
+1. VCC : DC power supply positive pole
+2. GND : DC power supply negative pole
+3. IN1~IN4 : relay signal triggering pin
+
+Relay output:
+1. Normally closed pin (NC1~NC4) : relay normally closed pin
+2. Common pin (COM1~COM4) : relay common pin 
+3. Normally opened pin (NO1~NO4) : relay normally opened pin

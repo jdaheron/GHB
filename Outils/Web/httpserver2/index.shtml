@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+
+<head>
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type">
+  <title>Test STM32-P207</title>
+  <meta content="JD" name="author">
+  <meta content="Page de test." name="description">
+</head>
+
+<body>
+  Test HttpServer STM32-P207.<br>
+  <br>
+  <form method="get" action="/Leds.cgi">
+    <input value="1" name="led" type="checkbox">STAT1<br>
+    <input value="2" name="led" type="checkbox">STAT2<br>
+    <input value="4" name="led" type="checkbox">STAT4<br>
+    <input value="Send" type="submit">
+  </form>
+	<form method="get" action="/StartUsb.cgi">
+    <input value="Start Usb Mode" type="submit">
+  </form>
+  
+  ADC Converted Value = <!--#t--> mV
+  
+</body>
+</html>

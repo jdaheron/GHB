@@ -1,0 +1,12 @@
+
+
+Product parameters:
+Dimensions: 40mm×40mm×10mm
+Speed reference: 4000±10%RPM
+Noise Reference: 18DB
+Airflow Reference :18.17-25.97CFM (30 à 42m3/h)
+Rated Voltage: 12V
+Rated current: 0.09A
+Package Type: Bulk
+Scope: VGA Card, Northbridge fan replacement
+Lead Length: 22CM
