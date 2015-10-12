@@ -37,7 +37,7 @@
 
 /* External Variables *****************************************************************************/
 
-const char VERSION_SW[] = {"00001AAC"};
+const char VERSION_SW[] = {"00001AAD"};
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
 #ifdef DEBUG_AVEC_BL
@@ -273,6 +273,84 @@ void Conf_Init()
 }
 
 
+Status_e Mode_Demarrage(void)
+{
+	static uint8_t Etape = 0;
+	Status_e Status = Status_EnCours;
+
+
+	switch (Etape)
+	{
+		// Start timer
+		case 0 :
+
+			//TSW_Start(&Tmr_START, 1000 * START_Tempo_s);
+
+			EtatVentillation	= Etat_INACTIF;
+			EtatChauffage		= Etat_INACTIF;
+
+			Etape++;
+			break;
+
+
+		// Test Ventillation
+		case 1 :
+
+			EtatVentillation	= Etat_ACTIF;
+			EtatChauffage		= Etat_INACTIF;
+
+			TSW_Start(&Tmr_START, 5000);
+
+			Etape++;
+			break;
+
+
+		// Wait end + Test Chauffage
+		case 2 :
+			if (TSW_IsRunning(&Tmr_START) == TRUE)
+			{
+				break;
+			}
+
+			EtatVentillation	= Etat_INACTIF;
+			EtatChauffage		= Etat_ACTIF;
+
+			TSW_Start(&Tmr_START, 5000);
+
+			Etape++;
+			break;
+
+		// Wait end
+		case 3 :
+			if (TSW_IsRunning(&Tmr_START) == TRUE)
+			{
+				break;
+			}
+
+			EtatVentillation	= Etat_INACTIF;
+			EtatChauffage		= Etat_INACTIF;
+
+			TSW_Start(&Tmr_START, 10000);
+
+			Etape++;
+			break;
+
+		case 4 :
+		default :
+			if (TSW_IsRunning(&Tmr_START) == TRUE)
+			{
+				break;
+			}
+
+			Status = Status_Fini;
+			Etape = 0;
+			break;
+	}
+
+	return Status;
+}
+
+
 /**
  * @}
  */ 
@@ -351,9 +429,6 @@ int main(void)
 
 	PC_Init();
 	Terminal_Init();
-
-	TSW_Start(&Tmr_START, 1000 * START_Tempo_s);
-
 
 	_printf("--- StartupTime=%dms ---\n\n", TSW_GetTimestamp_ms());
 	while(1)
@@ -451,13 +526,11 @@ int main(void)
 			//--------------------------------------------------------------
 			case MODE_DEMARRAGE :
 
-				EtatVentillation = Etat_INACTIF;
-				EtatChauffage = Etat_INACTIF;
+				if (Mode_Demarrage() == Status_Fini)
+				{
+					Mode = MODE_SURVEILLANCE;
+				}
 
-				if (TSW_IsRunning(&Tmr_START) == TRUE)
-					break;
-
-				Mode = MODE_SURVEILLANCE;
 				break;
 
 
