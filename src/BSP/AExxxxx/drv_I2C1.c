@@ -80,6 +80,109 @@ void I2C1_DeInit()
 
 
 /**-----------------------------------------------------------------------------
+ */
+void I2C1_SendStart(void)
+{
+	uint32_t TO;
+	const uint32_t TO_Value=0x400;
+
+
+	// START
+	I2C_GenerateSTART(I2C1, ENABLE);
+
+	// Wait EV5
+	TO = TO_Value;
+	while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) && (TO--));
+}
+
+
+/**-----------------------------------------------------------------------------
+ */
+void I2C1_SendStop(void)
+{
+	uint32_t TO;
+	const uint32_t TO_Value=0x400;
+
+
+	I2C_GenerateSTOP(I2C1, ENABLE);
+	TO = TO_Value;
+	while ((!I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE)) && (TO--));
+}
+
+
+/**-----------------------------------------------------------------------------
+ */
+void I2C1_SendAddress(uint8_t Address, uint8_t Tx0_Rx1)
+{
+	uint32_t TO;
+	const uint32_t TO_Value=0x400;
+
+
+	// ADDRESS
+	if (Tx0_Rx1 == 0)
+	{
+		I2C_Send7bitAddress(I2C1, Address, I2C_Direction_Transmitter);
+		// Wait EV8
+		TO = TO_Value;
+		while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTING)) && (TO--));
+	}
+	else
+	{
+		I2C_Send7bitAddress(I2C1, Address, I2C_Direction_Receiver);
+		// Wait EV6
+		TO = TO_Value;
+		while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) && (TO--));
+	}
+}
+
+
+/**-----------------------------------------------------------------------------
+ */
+void I2C1_SendByte(uint8_t Byte)
+{
+	uint32_t TO;
+	const uint32_t TO_Value=0x400;
+
+
+	// TX BYTE
+	I2C_SendData(I2C1, Byte);
+
+	// Wait EV8_2
+	TO = TO_Value;
+	while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED)) && (TO--));
+}
+
+
+/**-----------------------------------------------------------------------------
+ */
+uint8_t I2C1_ReceiveByte(Bool_e SendAck)
+{
+	uint8_t Data;
+	uint32_t TO;
+	const uint32_t TO_Value=0x400;
+
+
+	if (SendAck == TRUE)
+	{
+		I2C_AcknowledgeConfig(I2C1, ENABLE);
+	}
+	else
+	{
+		I2C_AcknowledgeConfig(I2C1, ENABLE);
+	}
+
+	// Wait EV7
+	TO = TO_Value;
+	while ((!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_BYTE_RECEIVED)) && (TO--));
+
+	Data = I2C_ReceiveData(I2C1);
+
+	return Data;
+}
+
+
+
+/**-----------------------------------------------------------------------------
  * @brief	Lecture d'un octet.
  *
  * @param[in]	SlaveAddress	Adresse du composant.
@@ -87,7 +190,6 @@ void I2C1_DeInit()
  *
  * @return		Data			Donnnee lue.
  */
-
 uint8_t I2C1_ReadByte(uint8_t SlaveAddress, uint8_t DataAddress)
 {
 	uint8_t Data;

@@ -33,6 +33,12 @@
 void I2C1_Init(uint32_t ClockSpeed);
 void I2C1_DeInit();
 
+void I2C1_SendStart(void);
+void I2C1_SendStop(void);
+void I2C1_SendAddress(uint8_t Address, uint8_t Tx0_Rx1);
+void I2C1_SendByte(uint8_t Byte);
+uint8_t I2C1_ReceiveByte(Bool_e SendAck);
+
 uint8_t  I2C1_ReadByte(uint8_t SlaveAddress, uint8_t DataAddress);
 uint16_t I2C1_ReadWord(uint8_t SlaveAddress, uint8_t DataAddress);
 void I2C1_ReadBuffer(uint8_t SlaveAddress, uint8_t DataAddress, uint8_t* pData, uint16_t Taille);

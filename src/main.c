@@ -11,13 +11,13 @@
 
 /* Includes ***************************************************************************************/
 
+#include "fct_TempHygro.h"
 #include "fct_MemoireFAT.h"
-#include "fct_Temperature.h"
 #include "drivers/drv_SdCard_SPI.h"
 #include "api_USB.h"
 
-#include "equ_Hygrometre.h"
-#include "equ_ThermocoupleK.h"
+//#include "equ_Hygrometre.h"
+//#include "equ_ThermocoupleK.h"
 
 #include "util_TSW.h"
 #include "util_printf.h"
@@ -37,7 +37,7 @@
 
 /* External Variables *****************************************************************************/
 
-const char VERSION_SW[] = {"00001AAD"};
+const char VERSION_SW[] = {"00001AAE"};
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
 #ifdef DEBUG_AVEC_BL
@@ -45,11 +45,6 @@ const char VERSION_SW[] = {"00001AAD"};
 #else
 	const uint32_t OFFSET = 0x00000000;
 #endif
-
-
-/** @addtogroup main
-  * @{
-  */ 
 
  
  /** 
@@ -75,13 +70,6 @@ typedef enum
 
 } ModeFct_e;
 
-
-
-
-/**
- * @}
- */ 
-
  
  /** 
  ***************************************************************************************************
@@ -92,13 +80,9 @@ typedef enum
 #define MAIN_CONSOLE_ENABLE		1
 #define USE_ETHERNET_AND_USB	0
 
-#define TEMPERATURE_PERIODE_ACQUISITION_ms	333
+#define TEMPERATURE_PERIODE_ACQUISITION_ms	2500
 
-#define REGLAGE_RTC()		//RTC_ReglerDateHeure(DIMANCHE, 9, 11, 2014, 0, 2, 0, TRUE)
-
-/**
- * @}
- */ 
+#define REGLAGE_RTC()		//RTC_ReglerDateHeure(DIMANCHE, 18, 10, 2015, 18, 35, 0, TRUE)
 
  
  /** 
@@ -114,22 +98,12 @@ typedef enum
 #endif
 
 
-
-/**
- * @}
- */ 
-
-  
  /** 
  ***************************************************************************************************
  * @defgroup Private_FunctionPrototypes Private FunctionPrototypes
  * @{
  */
 
-
-/**
- * @}
- */ 
  
  
   /** 
@@ -141,7 +115,7 @@ typedef enum
 static Mode_e Mode = MODE_DEMARRAGE;
 static Mode_e LastMode = 0xFF;
 static ModeFct_e ModeFct = MODE_FCT_SERVEUR;
-static TSW_s TmrAffichTemp;
+static TSW_s TmrAffichTempHygro;
 static TSW_s Tmr_LOG;
 static TSW_s Tmr_START;
 static TSW_s Tmr_CH;
@@ -174,12 +148,14 @@ static uint32_t EXT_SeuilStart_DegC			= 0;
 static uint32_t EXT_TempoApresEXT_s			= 0;
 static uint32_t	EXT_ActiverPendantChauffage	= 1;
 
-static uint32_t	LOG_Periode_s				= 0;
-#endif
+static float Temperature = 0;
+static float Hygrometrie = 0;
 
-/**
- * @}
- */ 
+static uint32_t	LOG_Periode_s				= 0;
+static uint32_t	LOG_PeriodePendantAction_s	= 0;
+
+
+#endif
   	
 	
 /** 
@@ -187,12 +163,9 @@ static uint32_t	LOG_Periode_s				= 0;
  * @defgroup Private_Functions Private Functions
  * @{
  */ 
- 
 
-/**
- * @brief	Gestion de la Led de LifeBit
- * @return 	void.
- */
+
+/**************************************************************************************************/
 void LifeBit_Main()
 {
 	TSW Tmr_LifeBit;
@@ -211,15 +184,19 @@ void LifeBit_Main()
 			Etat = Etat_INACTIF;
 		}
 
-		GPIO_Set(PORT_STAT1, Etat);
+		GPIO_Set(PORT_LED_LB, Etat);
 	}
 }
 
+
+/**************************************************************************************************/
 void LogInit()
 {
-	LogFile_Write("", 0, "Mode;Ventillation;Chauffage;Temperature");
+	LogFile_Write("", 0, "Mode;Ventillation;Chauffage;Temperature;Hygrometrie");
 }
 
+
+/**************************************************************************************************/
 void LogData()
 {
 	char LogBuffer[255];
@@ -227,18 +204,37 @@ void LogData()
 
 
 	// Mode, Temperature
-	if (Temperature_IsValide() == FALSE)
-		_sprintf(LogBuffer, "%d;-100\n", Mode);
+	if (TempHygro_IsValide() == FALSE)
+	{
+		_sprintf(LogBuffer, "%d;%d;%d;%.01f;%.01f;",
+				Mode, EtatVentillation, EtatChauffage,
+				-100, -100
+		);
+	}
 	else
 	{
-		Temperature_DegC = Temperature_Get_DegC100();
-		_sprintf(LogBuffer, "%d;%d;%d;%d,%02d", Mode, EtatVentillation, EtatChauffage, Temperature_DegC/100, Temperature_DegC%100);
+		_sprintf(LogBuffer, "%d;%d;%d;%.01f;%.01f;",
+				Mode, EtatVentillation, EtatChauffage,
+				Temperature, Hygrometrie
+		);
 	}
 
 	_printf("LOG:%s\n", LogBuffer);
 	LogFile_Write("", 0, LogBuffer);
+
+	if ((Mode == MODE_CHAUFFAGE)
+	||	(Mode == MODE_VENTILLATION))
+	{
+		TSW_Start(&Tmr_LOG, 1000 * LOG_PeriodePendantAction_s);
+	}
+	else
+	{
+		TSW_Start(&Tmr_LOG, 1000 * LOG_Periode_s);
+	}
 }
 
+
+/**************************************************************************************************/
 void Conf_Init()
 {
 	Parametres_Init();
@@ -257,6 +253,7 @@ void Conf_Init()
 	Parametres_Read(EXT_ACTIVER_PENDANT_CH, &EXT_ActiverPendantChauffage);
 
 	Parametres_Read(LOG_PERIODE_s, &LOG_Periode_s);
+	Parametres_Read(LOG_PERIODE_PENDANT_ACTION_s, &LOG_PeriodePendantAction_s);
 
 	Parametres_CloseFile();
 
@@ -269,10 +266,12 @@ void Conf_Init()
 	_printf("EXT_TempoApresEXT_s         =%d\n",	EXT_TempoApresEXT_s);
 	_printf("EXT_ActiverPendantChauffage =%d\n",	EXT_ActiverPendantChauffage);
 	_printf("LOG_Periode_s               =%d\n",	LOG_Periode_s);
+	_printf("LOG_PeriodePendantAction_s  =%d\n",	LOG_PeriodePendantAction_s);
 
 }
 
 
+/**************************************************************************************************/
 Status_e Mode_Demarrage(void)
 {
 	static uint8_t Etape = 0;
@@ -351,23 +350,156 @@ Status_e Mode_Demarrage(void)
 }
 
 
-/**
- * @}
- */ 
+/**************************************************************************************************/
+void Mode_Test()
+{
+	int Etape = 0;
 
-/**
- ***************************************************************************************************
- *
- */
+	while (1)
+	{
+		Etape++;
+
+		switch (Etape)
+		{
+			case 1 :
+				GPIO_Set(PORT_IHM_LED1, Etat_ACTIF);
+				GPIO_Set(PORT_IHM_LED2, Etat_INACTIF);
+				GPIO_Set(PORT_IHM_LED3, Etat_INACTIF);
+				break;
+
+			case 2 :
+				GPIO_Set(PORT_IHM_LED1, Etat_INACTIF);
+				GPIO_Set(PORT_IHM_LED2, Etat_ACTIF);
+				GPIO_Set(PORT_IHM_LED3, Etat_INACTIF);
+				break;
+
+			case 3 :
+				GPIO_Set(PORT_IHM_LED1, Etat_INACTIF);
+				GPIO_Set(PORT_IHM_LED2, Etat_INACTIF);
+				GPIO_Set(PORT_IHM_LED3, Etat_ACTIF);
+				break;
+
+			case 4 :
+				GPIO_Set(PORT_IHM_LED1, Etat_ACTIF);
+				GPIO_Set(PORT_IHM_LED2, Etat_ACTIF);
+				GPIO_Set(PORT_IHM_LED3, Etat_ACTIF);
+				break;
+
+			case 5 :
+				GPIO_Set(PORT_IHM_LED1, Etat_INACTIF);
+				GPIO_Set(PORT_IHM_LED2, Etat_INACTIF);
+				GPIO_Set(PORT_IHM_LED3, Etat_INACTIF);
+
+				GPIO_Set(PORT_RELAIS_L    , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_INACTIF);
+				break;
+
+			case 6 :
+				GPIO_Set(PORT_RELAIS_L    , Etat_ACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_INACTIF);
+				break;
+
+			case 7 :
+				GPIO_Set(PORT_RELAIS_L    , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_ACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_INACTIF);
+				break;
+
+
+			case 8 :
+				GPIO_Set(PORT_RELAIS_L    , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_ACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_INACTIF);
+				break;
+
+			case 9 :
+				GPIO_Set(PORT_RELAIS_L    , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_ACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_INACTIF);
+				break;
+
+			case 10 :
+				GPIO_Set(PORT_RELAIS_L    , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_ACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_INACTIF);
+				break;
+
+			case 11 :
+				GPIO_Set(PORT_RELAIS_L    , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_ACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_INACTIF);
+				break;
+
+			case 12 :
+				GPIO_Set(PORT_RELAIS_L    , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_ACTIF);
+				break;
+
+			case 13 :
+				GPIO_Set(PORT_RELAIS_L    , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_CH   , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_INT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_V_EXT, Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT1 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT2 , Etat_INACTIF);
+				GPIO_Set(PORT_RELAIS_OPT3 , Etat_INACTIF);
+				break;
+
+			default :
+				Etape = 0;
+				break;
+		}
+
+		TSW_Delay(1000);
+	}
+}
+
 
 char BufferIn[512];
 char BufferOut[1024];
 
 
+
+/**************************************************************************************************/
 int main(void)
 {
-	int16_t Temperature_DegC;
 	Bool_e NouveauMode;
+
 
 	// ------------------------------------------------------------------------
 	// --- INIT DU SYSTEME
@@ -376,20 +508,19 @@ int main(void)
 	SysTick_Config(SystemCoreClock / 1000);		// Init Tick 1ms
 	HAL_Console_Init(115200);
 	RTC_StartInit(TRUE);						// Start Init RTC
-	//I2C1_Init(100 * 1000);						// 100kHz
+	I2C1_Init(100 * 1000);						// 100kHz
 	ADC1_Init();
 
 	_printf("\n--- START - ALJ");
 	_printf(VERSION_SW);
 	_printf(" ---\n");
 
-
 	REGLAGE_RTC();
 
 	//----------------------------------
 	// FONCTIONNALITES
 	MemoireFAT_Init((Diskio_drvTypeDef*) &SdCard_SPI_Driver);
-	Temperature_Init(TEMPERATURE_PERIODE_ACQUISITION_ms);
+	TempHygro_Init(TEMPERATURE_PERIODE_ACQUISITION_ms);
 	Conf_Init();
 //	Hygrometre_Init();
 	LogInit();
@@ -425,10 +556,14 @@ int main(void)
 		}
 	#endif
 
-	TSW_Start(&TmrAffichTemp, 2000);
+	TSW_Start(&TmrAffichTempHygro, 3000);
 
 	PC_Init();
 	Terminal_Init();
+
+
+	//Mode_Test();
+
 
 	_printf("--- StartupTime=%dms ---\n\n", TSW_GetTimestamp_ms());
 	while(1)
@@ -457,12 +592,12 @@ int main(void)
 
 			// Choix du mode de fonctionnement
 			// WKUP = ACTIF -> USB  -  WKUP = INACTIF -> WebServer
-			if (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
-			{
-				RTC_BkpRegister_Write(0, 1);
-				while (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
-					TSW_Delay(100);
-				GOTO(0);
+			//if (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
+			//{
+			//	RTC_BkpRegister_Write(0, 1);
+			//	while (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
+			//		TSW_Delay(100);
+			//	GOTO(0);
 			}
 		#endif
 
@@ -471,33 +606,35 @@ int main(void)
 		LifeBit_Main();
 		RTC_Main();
 		MemoireFAT_Main();
-		Temperature_Thread();
+		TempHygro_Thread();
 
 		//----------------------------------
 		// LECTURE TEMPERATURE
-		if (Temperature_IsValide() == FALSE)
+		if (TempHygro_IsValide() == FALSE)
+		{
 			Mode = MODE_DEFAUT;
+		}
 		else
-			Temperature_DegC = Temperature_Get_DegC100() / 100;
+		{
+			Temperature = TempHygro_GetTemperature();
+			Hygrometrie = TempHygro_GetHygrometrie();
+		}
 
 		//----------------------------------
 		// AFFICHAGE TEMPERATURE
-		if (TSW_IsRunning(&TmrAffichTemp) == FALSE)
+		if (TSW_IsRunning(&TmrAffichTempHygro) == FALSE)
 		{
-			_printf("Temperature = ");
-			if (Temperature_IsValide() == FALSE)
+			_printf("TempHygro = ");
+			if (TempHygro_IsValide() == FALSE)
 				_printf("Non valide\n");
 			else
 			{
-				Temperature_DegC = Temperature_Get_DegC100();
-				_printf("%d.%02d %c\n",
-						Temperature_DegC/100,
-						Temperature_DegC%100,
-						'°');
-				Temperature_DegC /= 100;
+				_printf("%.01f %c\t%.01f %c\n",
+						Temperature, '°',
+						Hygrometrie, '%');
 			}
 
-			TSW_Start(&TmrAffichTemp, 1000);
+			TSW_Start(&TmrAffichTempHygro, 2500);
 		}
 
 		//----------------------------------
@@ -516,7 +653,6 @@ int main(void)
 		if (TSW_IsRunning(&Tmr_LOG) != TRUE)
 		{
 			LogData();
-			TSW_Start(&Tmr_LOG, 1000 * LOG_Periode_s);
 		}
 
 		//----------------------------------
@@ -545,19 +681,19 @@ int main(void)
 					EtatChauffage = Etat_INACTIF;
 				}
 
-				// Attente fin timer CH
-				if (TSW_IsRunning(&Tmr_CH) == TRUE)
-					break;
-
-				// Attente fin timer EXT
-				if (TSW_IsRunning(&Tmr_EXT) == TRUE)
-					break;
-
-				if (Temperature_DegC < CH_SeuilStart_DegC)
+				// Pas de chauffage dessuite après l'extraction
+				if ((Temperature < CH_SeuilStart_DegC)
+				&&	(TSW_IsRunning(&Tmr_EXT) == FALSE))
+				{
 					Mode = MODE_CHAUFFAGE;
+				}
 
-				if (Temperature_DegC >= EXT_SeuilStart_DegC)
+				// Pas d'extraction dessuite après le chauffage
+				if ((Temperature >= EXT_SeuilStart_DegC)
+				&&	(TSW_IsRunning(&Tmr_CH) == FALSE))
+				{
 					Mode = MODE_VENTILLATION;
+				}
 
 				break;
 
@@ -577,7 +713,7 @@ int main(void)
 				}
 
 				// Attente franchissement seuil
-				if (Temperature_DegC >= CH_SeuilStop_DegC)
+				if (Temperature >= CH_SeuilStop_DegC)
 				{
 					EtatChauffage = Etat_INACTIF;
 
@@ -598,7 +734,7 @@ int main(void)
 					EtatVentillation = Etat_ACTIF;
 				}
 
-				if (Temperature_DegC < EXT_SeuilStop_DegC)
+				if (Temperature < EXT_SeuilStop_DegC)
 				{
 					EtatVentillation = Etat_INACTIF;
 
@@ -631,18 +767,19 @@ int main(void)
 
 		//----------------------------------
 		// MAJ DES SORTIES
-		if (GPIO_Get(PORT_REL1_VENTILLATION) != EtatVentillation)
+		if (GPIO_Get(PORT_RELAIS_V_EXT) != EtatVentillation)
 		{
 			_printf("Ventillation = %d\n", EtatVentillation);
-			GPIO_Set(PORT_REL1_VENTILLATION, EtatVentillation);
-			LogData();
+			GPIO_Set(PORT_RELAIS_V_EXT, EtatVentillation);
+			//LogData();
 		}
-		if (GPIO_Get(PORT_REL2_CHAUFFAGE) != EtatChauffage)
+		if (GPIO_Get(PORT_RELAIS_CH) != EtatChauffage)
 		{
 			_printf("Chauffage = %d\n", EtatChauffage);
-			GPIO_Set(PORT_REL2_CHAUFFAGE, EtatChauffage);
-			LogData();
+			GPIO_Set(PORT_RELAIS_CH, EtatChauffage);
+			//LogData();
 		}
+
 	}
 
 	return 0;
@@ -650,11 +787,7 @@ int main(void)
 }
 
 
-/**
- ***************************************************************************************************
- * Validation OK - JD le 08/09/2014
- */
-
+/**************************************************************************************************/
 extern void SdCard_SPI_timerproc (void);
 
 void ApplicationTickHook (void) {
@@ -683,11 +816,7 @@ void ApplicationTickHook (void) {
 }
 
 
-/**
-  * @brief  Inserts a delay time.
-  * @param  nCount: number of 10ms periods to wait for.
-  * @retval None
-  */
+/**************************************************************************************************/
 void Delay(uint32_t nCount)
 {
   /* Capture the current local time */
@@ -699,9 +828,5 @@ void Delay(uint32_t nCount)
   }
 }
 
-
- /**
- * @}
- */ 
 
 /* End Of File ************************************************************************************/

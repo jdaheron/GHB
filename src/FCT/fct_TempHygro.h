@@ -21,18 +21,14 @@
 #include "util_TSW.h"
 
 
-/** @defgroup fct_Temperature fct_Temperature
-  * @brief Gestion de la temperature.
-  * @{
-  */ 
-
 /** 
  ***************************************************************************************************
  * @defgroup Exported_Defines Exported Defines
  * @{
  */
 
-#define TEMPERATURE_NB_ECH		15
+#define TEMPHYGRO_NB_ECH				4
+#define TEMPHYGRO_NB_READ_ERROR_MAX		10
 
 
  /**
@@ -51,13 +47,16 @@
 typedef struct {
 
 	Bool_e		IsValide;
-	int16_t		CurrentTemp_DegC100;
-	int16_t		TableAcquisition[TEMPERATURE_NB_ECH];
+	uint8_t		NbReadError;
+	float		CurrentTemp_DegC;
+	float		CurrentHygro_pr100;
+	int16_t		TempAcquisition[TEMPHYGRO_NB_ECH];
+	int16_t		HygroAcquisition[TEMPHYGRO_NB_ECH];
 	uint16_t	iAcquisition;
 	uint32_t	PeriodeAcquisition_ms;
 	TSW_s		TmrAcquisition;
 
-} Temperature_s;
+} TempHygro_s;
 
 
 /**
@@ -93,15 +92,14 @@ typedef struct {
  * @{
  */
 
-void	Temperature_Init(uint32_t PeriodeAcquisition_ms);
-void	Temperature_Thread(void);
-Bool_e	Temperature_IsValide(void);
-int16_t	Temperature_Get_DegC100(void);
-	 
- /**
- * @}
- */ 
- 
+
+void 	TempHygro_Init(uint32_t PeriodeAcquisition_ms);
+void 	TempHygro_Read(void);
+void 	TempHygro_Thread(void);
+Bool_e 	TempHygro_IsValide(void);
+float 	TempHygro_GetTemperature(void);
+float 	TempHygro_GetHygrometrie(void);
+
  
  /**
  * @}

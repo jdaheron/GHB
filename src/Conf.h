@@ -59,6 +59,7 @@ typedef enum
 	EXT_ACTIVER_PENDANT_CH,
 
 	LOG_PERIODE_s,
+	LOG_PERIODE_PENDANT_ACTION_s,
 
 	NB_PARAM,
 	
@@ -105,7 +106,7 @@ static const Key_s ParamDefaultValue[] =
 		{KeyType_Int,	"EXTRACT",		"ActiverPendantCh",			(void*) (0),		(void*) (0),		(void*) (1)					},
 
 		{KeyType_Int,	"LOG",			"Periode_s",				(void*) (60),		(void*) (5),		(void*) (3600)				},
-
+		{KeyType_Int,	"LOG",			"PeriodePendantAction_s",	(void*) (60),		(void*) (5),		(void*) (3600)				},
 };
 
 static const IniFile_s Param_IniFile = {
