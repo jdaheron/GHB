@@ -48,8 +48,8 @@
 /*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
 #define IP_ADDR0	192
 #define IP_ADDR1	168
-#define IP_ADDR2	30
-#define IP_ADDR3	199
+#define IP_ADDR2	1
+#define IP_ADDR3	200
 
 /*NETMASK*/
 #define NETMASK_ADDR0	255
@@ -60,8 +60,8 @@
 /*Gateway Address*/
 #define GW_ADDR0	192
 #define GW_ADDR1	168
-#define GW_ADDR2	30
-#define GW_ADDR3	1
+#define GW_ADDR2	1
+#define GW_ADDR3	100
 
 /* MII and RMII mode selection, for STM322xG-EVAL Board(MB786) RevB ***********/
 #define RMII_MODE

@@ -92,7 +92,8 @@
                              } while(0)
 
 #else  /* LWIP_DEBUG */
-#define LWIP_DEBUGF(debug, message) 
+//#include "util_printf.h"
+#define LWIP_DEBUGF(debug, message) //_printfmessage
 #endif /* LWIP_DEBUG */
 
 #endif /* __LWIP_DEBUG_H__ */

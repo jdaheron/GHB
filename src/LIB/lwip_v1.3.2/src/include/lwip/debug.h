@@ -81,7 +81,7 @@
  */
 
 
-#define LWIP_PLATFORM_DIAG printf
+#define LWIP_PLATFORM_DIAG _printf
 #define LWIP_DEBUGF(debug, message) do { \
                                if ( \
                                    ((debug) & LWIP_DBG_ON) && \

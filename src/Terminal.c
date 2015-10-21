@@ -104,6 +104,15 @@ void Cmd_Quit(
 	Terminal_Write("Cmd_Quit\n");
 }
 
+void Cmd_Reboot(
+		char*			bufferIn,				/**< Trame d'entreee, non utilisee.*/
+		pSendResponse_f	Terminal_Write			/**< Fonction d'emission de la reponse.*/
+)
+{
+	Terminal_Write("Reboot bms...\n");
+	GOTO(0);
+}
+
 void Cmd_ListFiles(
 		char*			bufferIn,				/**< Trame d'entreee, non utilisee.*/
 		pSendResponse_f	Terminal_Write			/**< Fonction d'emission de la reponse.*/
@@ -299,6 +308,8 @@ Terminal_Init(
 	//TODO : DEBUG
 	Terminal_RegisterCommand("quit",	Cmd_Quit,				"Fonction d'arret");
 	Terminal_RegisterCommand("ls",		Cmd_ListFiles,			"Affichage de la liste des fichiers d'un repertoire");
+	Terminal_RegisterCommand("reboot",	Cmd_Reboot,				"Redémarrage SW");
+
 }
 
 /**

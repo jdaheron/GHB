@@ -28,7 +28,7 @@ MEMORY
 /*------------------------------------------------------------------------------*/
 
 /* Generate a link error if heap and stack don't fit into RAM */
-_Heap_Size =	1*1024;		/* required amount of heap  */
+_Heap_Size =	10*1024;		/* required amount of heap  */
 _Stack_Size =	8*1024;		/* required amount of stack */
 
 /* Highest address of the user mode stack */

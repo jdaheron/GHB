@@ -91,7 +91,7 @@ void ETH_BSP_Config(void)
 	ETH_SoftwareReset();
 
 	/* Wait for software reset */
-	while(ETH_GetSoftwareResetStatus() == SET);
+	while (ETH_GetSoftwareResetStatus() == SET);
 
 	/* ETHERNET Configuration ------------------------------------------------------*/
 	/* Call ETH_StructInit if you don't like to configure all ETH_InitStructure parameter */
@@ -112,22 +112,27 @@ void ETH_BSP_Config(void)
 	ETH_InitStructure.ETH_UnicastFramesFilter		= ETH_UnicastFramesFilter_Perfect;
 
 	unsigned int PhyAddr;
+	uint16_t reg2;
+	uint16_t reg3;
 
 	// read the ID for match
-	for(PhyAddr = 1; 32 >= PhyAddr; PhyAddr++)
+	for (PhyAddr = 1; 32 >= PhyAddr; PhyAddr++)
 	{
-		if((0x0022 == ETH_ReadPHYRegister(PhyAddr,2)) && (0x1619 == (ETH_ReadPHYRegister(PhyAddr,3))))
+		reg2 = ETH_ReadPHYRegister(PhyAddr,2);
+		reg3 = ETH_ReadPHYRegister(PhyAddr,3);
+
+		if ((reg2 == 0x0022) && (reg3 == 0x1609))
 			break;
 	}
 
-	if(32 < PhyAddr)
+	if (PhyAddr > 32)
 	{
 		_printf("Ethernet Phy Not Found\n\r");
 		return;// 1;
 	}
 
 	/* Configure Ethernet */
-	if(0 == ETH_Init(&ETH_InitStructure, PhyAddr))
+	if (ETH_Init(&ETH_InitStructure, PhyAddr) == 0)
 	{
 		_printf("Ethernet Initialization Failed\n\r");
 		return;// 1;

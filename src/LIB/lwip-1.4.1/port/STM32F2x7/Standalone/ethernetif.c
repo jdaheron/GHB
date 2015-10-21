@@ -250,7 +250,8 @@ err_t ethernetif_input(struct netif *netif)
   p = low_level_input(netif);
 
   /* no packet could be read, silently ignore this */
-  if (p == NULL) return ERR_MEM;
+  if (p == NULL)
+	  return ERR_MEM;
 
   /* entry point to the LwIP stack */
   err = netif->input(p, netif);

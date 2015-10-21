@@ -37,7 +37,7 @@
 
 /* External Variables *****************************************************************************/
 
-const char VERSION_SW[] = {"00001AAE"};
+const char VERSION_SW[] = {"00001AAY"};
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
 #ifdef DEBUG_AVEC_BL
@@ -78,11 +78,11 @@ typedef enum
  */
  
 #define MAIN_CONSOLE_ENABLE		1
-#define USE_ETHERNET_AND_USB	0
+#define USE_ETHERNET_AND_USB	1
 
 #define TEMPERATURE_PERIODE_ACQUISITION_ms	2500
 
-#define REGLAGE_RTC()		//RTC_ReglerDateHeure(DIMANCHE, 18, 10, 2015, 18, 35, 0, TRUE)
+#define REGLAGE_RTC()		//RTC_ReglerDateHeure(LUNDI, 19, 10, 2015, 22, 15, 0, TRUE)
 
  
  /** 
@@ -177,6 +177,7 @@ void LifeBit_Main()
 		{
 			TSW_Start(&Tmr_LifeBit, 10);
 			Etat = Etat_ACTIF;
+			_printf("lb\n");
 		}
 		else
 		{
@@ -256,6 +257,21 @@ void Conf_Init()
 	Parametres_Read(LOG_PERIODE_PENDANT_ACTION_s, &LOG_PeriodePendantAction_s);
 
 	Parametres_CloseFile();
+
+	if (LOG_Periode_s == 0)
+	{
+		START_Tempo_s				= 120;
+		CH_SeuilStart_DegC			= 20;
+		CH_SeuilStop_DegC			= 28;
+		CH_TempoApresCh_s			= 120;
+		EXT_SeuilStart_DegC			= 32;
+		EXT_SeuilStop_DegC			= 25;
+		EXT_TempoApresEXT_s			= 120;
+		EXT_ActiverPendantChauffage	= 0;
+		LOG_Periode_s				= 120;
+		LOG_PeriodePendantAction_s	= 110;
+
+	}
 
 	_printf("START_Tempo_s               =%d\n",	START_Tempo_s);
 	_printf("CH_SeuilStart_DegC          =%d\n",	CH_SeuilStart_DegC);
@@ -564,10 +580,12 @@ int main(void)
 
 	//Mode_Test();
 
+	WDG_InitWWDG(2000);
 
 	_printf("--- StartupTime=%dms ---\n\n", TSW_GetTimestamp_ms());
 	while(1)
 	{
+		WDG_Refresh();
 
 		if (PC_Read((uint8_t*) BufferIn, NULL) == TRUE)
 		{
@@ -598,7 +616,7 @@ int main(void)
 			//	while (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
 			//		TSW_Delay(100);
 			//	GOTO(0);
-			}
+			//}
 		#endif
 
 		//----------------------------------
@@ -622,7 +640,7 @@ int main(void)
 
 		//----------------------------------
 		// AFFICHAGE TEMPERATURE
-		if (TSW_IsRunning(&TmrAffichTempHygro) == FALSE)
+/*		if (TSW_IsRunning(&TmrAffichTempHygro) == FALSE)
 		{
 			_printf("TempHygro = ");
 			if (TempHygro_IsValide() == FALSE)
@@ -636,7 +654,7 @@ int main(void)
 
 			TSW_Start(&TmrAffichTempHygro, 2500);
 		}
-
+*/
 		//----------------------------------
 		// DETECTION CHG MODE
 		if (LastMode != Mode)
