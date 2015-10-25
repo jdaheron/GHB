@@ -437,7 +437,7 @@ static err_t telnet_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 	tcp_err(pcb, conn_err);
 	tcp_poll(pcb, telnet_poll, 4);
 
-	usprintf(tstr,"\nWelcome to JD TELNET.\r\n%s", prompt);
+	usprintf(tstr,"--- Welcome to JD TELNET. ---%s", prompt);
 	hs->data_out = tstr;
 	hs->left = strlen(tstr);
 	send_data(pcb, hs);

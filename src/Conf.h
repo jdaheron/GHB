@@ -61,6 +61,15 @@ typedef enum
 	LOG_PERIODE_s,
 	LOG_PERIODE_PENDANT_ACTION_s,
 
+	ARROSAGE_START_HEURE			,
+	ARROSAGE_START_MINUTE			,
+	ARROSAGE_DUREE_s				,
+	ARROSAGE_VOLUME_PER_PLANT_ml	,
+	ARROSAGE_NB_PLANT				,
+	ARROSAGE_PUMP_DEBIT_ml_per_h	,
+	ARROSAGE_RESERVOIR_VOLUME_ml	,
+	ARROSAGE_RESERVOIR_RESTANT_ml	,
+
 	NB_PARAM,
 	
 } Param_Liste_e;
@@ -107,6 +116,15 @@ static const Key_s ParamDefaultValue[] =
 
 		{KeyType_Int,	"LOG",			"Periode_s",				(void*) (60),		(void*) (5),		(void*) (3600)				},
 		{KeyType_Int,	"LOG",			"PeriodePendantAction_s",	(void*) (60),		(void*) (5),		(void*) (3600)				},
+
+		{KeyType_Int,	"ARROSAGE",		"Start_Heure",				(void*) (20),		(void*) (0),		(void*) (24)				},
+		{KeyType_Int,	"ARROSAGE",		"Start_Minute",				(void*) (00),		(void*) (0),		(void*) (60)				},
+		{KeyType_Int,	"ARROSAGE",		"Duree_s",					(void*) (0),		(void*) (0),		(void*) (24)				},
+		{KeyType_Int,	"ARROSAGE",		"VolumePerPlant_ml",		(void*) (0),		(void*) (0),		(void*) (1000000)			},
+		{KeyType_Int,	"ARROSAGE",		"NbPlant",					(void*) (0),		(void*) (0),		(void*) (100)				},
+		{KeyType_Int,	"ARROSAGE",		"Pump_Debit_ml_per_h",		(void*) (12300),	(void*) (100),		(void*) (1000000)			},
+		{KeyType_Int,	"ARROSAGE",		"Reservoir_Volume_ml",		(void*) (4000),		(void*) (100),		(void*) (1000000)			},
+		{KeyType_Int,	"ARROSAGE",		"Reservoir_Restant_ml",		(void*) (0),		(void*) (0),		(void*) (1000000)			},
 };
 
 static const IniFile_s Param_IniFile = {

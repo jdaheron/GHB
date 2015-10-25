@@ -691,31 +691,50 @@ IniFile_ReadValueFromKey(
 		return Status_KO;
 
 	// Verification de l'existance de la cle
-	if ( IniFile_IsKeyExist(pKey->SectionName, pKey->KeyName) == FALSE )
-		return Status_KO;
-
-	// Ecriture de la donnee
-	switch(pKey->KeyType)
+	if (IniFile_IsKeyExist(pKey->SectionName, pKey->KeyName) == FALSE )
 	{
-		case KeyType_Int:
-			*((long*) pValue) = strtoul( IniFile_ReadValueFromLine(), NULL ,10);
-			break;
+		switch(pKey->KeyType)
+		{
+			case KeyType_Int:
+				*((long*) pValue) = (long) pKey->Value;
+				break;
 
-		case KeyType_Str:
-			strncpy( (TCHAR*) pValue, IniFile_ReadValueFromLine(), DATA_STR_MAX_SIZE );
-			break;
+			case KeyType_Str:
+				strncpy( (TCHAR*) pValue, pKey->Value, DATA_STR_MAX_SIZE);
+				break;
 
-		case KeyType_SectionName:
-		default:
-			// Nothing to do.
-			break;
+			case KeyType_SectionName:
+			default:
+				break;
+		}
+	}
+	else
+	{
+		// Ecriture de la donnee
+		switch(pKey->KeyType)
+		{
+			case KeyType_Int:
+				*((long*) pValue) = strtoul( IniFile_ReadValueFromLine(), NULL ,10);
+				break;
 
-		//case KeyType_Float:
-		//	ini_putf(pKeyValue[iKey].SectionName, pKeyValue[iKey].KeyName, (float) pKeyValue[iKey].DefaultValue, FileName);
-		//	break;
+			case KeyType_Str:
+				strncpy( (TCHAR*) pValue, IniFile_ReadValueFromLine(), DATA_STR_MAX_SIZE );
+				break;
+
+			case KeyType_SectionName:
+			default:
+				// Nothing to do.
+				break;
+
+			//case KeyType_Float:
+			//	ini_putf(pKeyValue[iKey].SectionName, pKeyValue[iKey].KeyName, (float) pKeyValue[iKey].DefaultValue, FileName);
+			//	break;
+		}
+
+		return Status_OK;
 	}
 
-	return Status_OK;
+	return Status_KO;
 }
 
 #if 0 // TODO __NON_UTILISEE__ (PG)

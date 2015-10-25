@@ -63,7 +63,7 @@ void PC_Init(
 		.Baudrate		= 0,
 
 		.pRxFct			= (pFunction) HAL_Console_Read,
-		.pRxBuffer		=  (uint8_t *) buff_PC,
+		.pRxBuffer		= (uint8_t *) buff_PC,
 		.RxBufferSize	= PC_BUFFER_SIZE,
 		.RxSOFcar		= 0,
 		.RxEOFstr		= "\n",
