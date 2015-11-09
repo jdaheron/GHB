@@ -37,7 +37,7 @@
 
 /* External Variables *****************************************************************************/
 
-const char VERSION_SW[] = {"00001AAF"};
+const char VERSION_SW[] = {"00001AAG"};
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
 #ifdef DEBUG_AVEC_BL
@@ -236,7 +236,8 @@ void LogData()
 	LogFile_Write("", 0, LogBuffer);
 
 	if ((Mode == MODE_CHAUFFAGE)
-	||	(Mode == MODE_VENTILLATION))
+	||	(Mode == MODE_VENTILLATION)
+	||	(EtatArrosage == Etat_INACTIF))
 	{
 		TSW_Start(&Tmr_LOG, 1000 * LOG_PeriodePendantAction_s);
 	}

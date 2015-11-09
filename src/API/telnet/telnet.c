@@ -9,31 +9,6 @@
  *
  * Copyright (c) 2010, Jesper Hansen
  * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- *      * Redistributions of source code must retain the above copyright notice, this
- *       list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright notice,
- *       this list of conditions and the following disclaimer in the documentation
- *       and/or other materials provided with the distribution.
- *     * Neither the name of the copyright holders nor the names of any contributors
- *       may be used to endorse or promote products derived from this software
- *       without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- * OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- *
  */
 
 
@@ -46,6 +21,8 @@
 
 #include <string.h>
 #include "telnet.h"
+#include "Terminal.h"
+
 
 #define usprintf 	_sprintf
 #define UARTprintf	_printf
@@ -78,22 +55,23 @@ struct telnet_state {
 
 char tstr[1024];
 char *prompt = "\r\nJdTelnet>";
+char *welcom = "Welcome to JD TELNET";
 extern char VERSION_SW[];
+static uint8_t NbActiveconnection = 0;
 
-void addPrompt(struct telnet_state *hs)
+
+
+/*-----------------------------------------------------------------------------------*/
+uint8_t Telnet_GetNbActiveConnection(void)
 {
-	usprintf(&hs->data_out[hs->left], "%s", prompt);
-	hs->left += strlen(prompt);
+	return NbActiveconnection;
 }
 
-#include "Terminal.h"
 
+/*-----------------------------------------------------------------------------------*/
 // telnet command handler
 void cmd_parser(struct telnet_state *hs)
 {
-
-	//char* p = hs->cmd_buffer;
-
 	Terminal_Parser(hs->cmd_buffer, tstr, 1024);
 	if (strlen(tstr) > 0)
 	{
@@ -104,64 +82,7 @@ void cmd_parser(struct telnet_state *hs)
 	hs->cmd_buffer[0] = 0;
 
 	return;
-
-	char* p = hs->cmd_buffer;
-	char* pDeb;
-	char* pParam0;
-
-	if (strstr(p, "quit"))
-	{
-		hs->left = 0;
-		hs->flags |= TELNET_FLAG_CLOSE_CONNECTION;
-	}
-	else if (pDeb = strstr(p, "ls"))
-	{
-		if (strlen(pDeb) > 3)
-			MemoireFAT_PrintFileList(pDeb + 3, tstr, 2000);
-		else
-			MemoireFAT_PrintFileList("", tstr, 2000);
-		hs->data_out = tstr;
-		hs->left = strlen(hs->data_out);
-		addPrompt(hs);
-	}
-	else if (pDeb = strstr(p, "get_v"))
-	{
-		usprintf(tstr,"VersionSW = AL%s\r\n", VERSION_SW);
-		hs->data_out = tstr;
-		hs->left = strlen(hs->data_out);
-		addPrompt(hs);
-	}
-	else if (pDeb = strstr(p, "reboot"))
-	{
-		usprintf(tstr,"Rebooting device...\r\n");
-		hs->data_out = tstr;
-		hs->left = strlen(hs->data_out);
-		addPrompt(hs);
-
-		GOTO(0);
-	}
-	else if (pDeb = strstr(p, "delete "))
-	{
-		pParam0 = pDeb + strlen("delete ");
-		f_unlink(pParam0);
-		usprintf(tstr,"Delete file: %s\r\n", pParam0);
-		hs->data_out = tstr;
-		hs->left = strlen(hs->data_out);
-		addPrompt(hs);
-	}
-	else
-	{
-		usprintf(tstr,"\r\nThis is TELNET echoing your command : \"%s\"%s",p,prompt);
-		hs->data_out = tstr;
-		hs->left = strlen(hs->data_out);
-	}
-
-	hs->cmd_buffer[0] = 0;
-	// copy any remaining part of command line to position 0
-	//strcpy(hs->cmd_buffer,q+1);
 }
-
-
 
 
 /*-----------------------------------------------------------------------------------*/
@@ -176,11 +97,24 @@ static void conn_err(void *arg, err_t err)
 /*-----------------------------------------------------------------------------------*/
 static void close_conn(struct tcp_pcb *pcb, struct telnet_state *hs)
 {
+	UARTprintf("Close connection from %d.%d.%d.%d:%d\n",
+			(pcb->remote_ip.addr >> 0) & 0xff,
+			(pcb->remote_ip.addr >> 8) & 0xff,
+			(pcb->remote_ip.addr >> 16) & 0xff,
+			(pcb->remote_ip.addr >> 24) & 0xff,
+			(pcb->remote_port) & 0xff
+	);
+
 	tcp_arg(pcb, NULL);
 	tcp_sent(pcb, NULL);
 	tcp_recv(pcb, NULL);
 	mem_free(hs);
 	tcp_close(pcb);
+
+	if (NbActiveconnection > 0)
+	{
+		NbActiveconnection--;
+	}
 }
 
 /*-----------------------------------------------------------------------------------*/
@@ -389,7 +323,8 @@ static err_t telnet_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t e
 
 	}
 
-	if (err == ERR_OK && p == NULL) {
+	if (err == ERR_OK && p == NULL)
+	{
 		UARTprintf("remote host closed connection\n");
 		close_conn(pcb, hs);
 	}
@@ -416,7 +351,13 @@ static err_t telnet_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 		return ERR_MEM;
 	}
 
-	UARTprintf("new connection from %d.%d.%d.%d\n", (pcb->remote_ip.addr >> 0) & 0xff, (pcb->remote_ip.addr >> 8) & 0xff, (pcb->remote_ip.addr >> 16) & 0xff, (pcb->remote_ip.addr >> 24) & 0xff);
+	UARTprintf("New connection from %d.%d.%d.%d:%d\n",
+			(pcb->remote_ip.addr >> 0) & 0xff,
+			(pcb->remote_ip.addr >> 8) & 0xff,
+			(pcb->remote_ip.addr >> 16) & 0xff,
+			(pcb->remote_ip.addr >> 24) & 0xff,
+			(pcb->remote_port) & 0xff
+	);
 
 	/* Initialize the structure. */
 	hs->data_out = NULL;
@@ -437,10 +378,12 @@ static err_t telnet_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 	tcp_err(pcb, conn_err);
 	tcp_poll(pcb, telnet_poll, 4);
 
-	usprintf(tstr,"--- Welcome to JD TELNET. ---%s", prompt);
+	usprintf(tstr,"--- %s (AL%s) ---%s", welcom, VERSION_SW, prompt);
 	hs->data_out = tstr;
 	hs->left = strlen(tstr);
 	send_data(pcb, hs);
+
+	NbActiveconnection++;
 
 	return ERR_OK;
 }
@@ -458,5 +401,7 @@ void telnet_init(void)
 	tcp_bind(pcb, IP_ADDR_ANY, 23);
 	pcb = tcp_listen(pcb);
 	tcp_accept(pcb, telnet_accept);
+
+	NbActiveconnection = 0;
 }
 

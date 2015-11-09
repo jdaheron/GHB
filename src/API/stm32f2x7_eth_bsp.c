@@ -24,8 +24,6 @@
 #include "stm32f2x7_eth_bsp.h"
 #include "main.h"
 #include "stm32f2xx_hal_conf.h"
-#include "util_printf.h"
-
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/

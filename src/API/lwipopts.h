@@ -210,7 +210,7 @@ The STM32F4x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
    ---------- Lwip Debug options ----------
    ----------------------------------------
 */
-#define LWIP_DEBUG                      1
+//#define LWIP_DEBUG                      1
 
 #endif /* __LWIPOPTS_H__ */
 
