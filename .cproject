@@ -54,34 +54,37 @@
 									<listOptionValue builtIn="false" value="USE_STDPERIPH_DRIVER"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.1879190784" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/CMSIS/CM3/CoreSupport}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/CMSIS/CM3/DeviceSupport/ST/STM32F2xx}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/STM32F2xx_StdPeriph_Driver/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/STM32F2xx_HAL_Driver/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/STM32F2x7_ETH_Driver}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/CMSIS/CM3/CoreSupport}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/CMSIS/CM3/DeviceSupport/ST/STM32F2xx}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32F2xx_StdPeriph_Driver/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32F2xx_HAL_Driver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32F2x7_ETH_Driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32_USBD_Lib/Core/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32_USBD_Lib/Class/CDC/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32_USBD_Lib/Class/MSC/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/Comp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/UTILS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/EQU}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/src/include/lwip}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/src/include/netif}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/src/include/ipv4}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/port/STM32F2x7}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/port/STM32F2x7/Standalone}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/src/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/SERVER_HTTP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/SERVER_TELNET}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/SERVER_TFTP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/FILES}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/FILES/FatFs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/FILES/IniParser}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/USB}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/FatFs}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/IniParser}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/STM32_USBD_Lib/Core/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/STM32_USBD_Lib/Class/CDC/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/STM32_USBD_Lib/Class/MSC/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/src/include/lwip}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/src/include/netif}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/src/include/ipv4}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/port/STM32F2x7}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/port/STM32F2x7/Standalone}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/src/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/API}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/API/httpserver}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/API/telnet}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/API/tftpserver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/USB/LIB}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ARROSAGE}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/CHAUFFAGE}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/VENTILATION}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.569302420" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.gnu99" valueType="enumerated"/>
@@ -122,7 +125,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/BSP/AExxxxx/Comp/Unused|src/LIB/IniParser|src/Unused|src/API/httpserver|src/LIB/lwip-1.4.1/test|src/LIB/lwip_v1.3.2|src/LIB/lwip-1.4.1/src/include/ipv6|src/LIB/lwip-1.4.1/src/core/ipv6|src/LIB/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/API/httpserver/fs|src/API/httpserver/Unused|src/LIB/FatFs/option/unicode.c|src/LIB/FatFs/drivers/Unused|src/LIB/STM32_USBD_Lib/Class/Template|src/LIB/STM32_USBD_Lib/Class/HID|src/LIB/STM32_USBD_Lib/Class/DFU|src/LIB/STM32_USBD_Lib/Class/CustomHID|src/LIB/STM32_USBD_Lib/Class/AUDIO|src/LIB/STM32_USBD_Lib/Core/Template|src/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/lwip_v1.3.2/src/include/ipv6|src/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USBD_Lib/Class/Template|src/APP/LIB/STM32_USBD_Lib/Class/HID|src/APP/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/CustomHID|src/APP/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/LIB/STM32_USBD_Lib/Core/Template|src/APP/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USB_Device_Library/Class/AUDIO|src/APP/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/APP/LIB/STM32_USB_Device_Library/Class/Template|src/APP/LIB/FatFs/drivers/Unused|src/APP/LIB/STM32_USB_Device_Library/Core/Template|src/EQU/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/HID|src/APP/API/httpserver/Unused|src/UTILS/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/CustomHID|src/APP/API/tftpserver|src/APP/LIB/FatFs/option/unicode.c|src/APP/LIB/STM32_USB_Device_Library/Class/DFU" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/FCT/FILES/FatFs/option/ccsbcs.c|src/FCT/ETH/lwip-1.4.1/src/core/ipv6|src/FCT/FILES/FatFs/drivers/Unused|src/FCT/ETH/lwip-1.4.1/test|src/FCT/ETH/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/BSP/STM32_USBD_Lib/Core/Template|src/BSP/STM32_USBD_Lib/Class/HID|src/BSP/STM32_USBD_Lib/Class/Template|src/BSP/STM32_USBD_Lib/Class/DFU|src/BSP/STM32_USBD_Lib/Class/CustomHID|src/BSP/STM32_USBD_Lib/Class/AUDIO|src/FCT/ETH/SERVER_HTTP|src/BSP/Comp/Unused|src/FCT/ETHERNET/SERVER_HTTP|src/FCT/ETHERNET/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/FCT/ETHERNET/lwip-1.4.1/src/core/ipv6|src/FCT/ETHERNET/lwip-1.4.1/test|src/FCT/FILE_SYSTEM/FatFs/drivers/Unused|src/FCT/USB/STM32_USBD_Lib/Class/DFU|src/FCT/USB/STM32_USBD_Lib/Class/HID|src/FCT/USB/STM32_USBD_Lib/Class/CustomHID|src/FCT/USB/STM32_USBD_Lib/Class/AUDIO|src/FCT/USB/STM32_USBD_Lib/Class/Template|src/FCT/USB/STM32_USBD_Lib/Core/Template|src/FCT/USB/LIB/STM32_USB_Device_Library/Class/DFU|src/APP/LIB/STM32_USB_Device_Library/Class/HID|src/APP/LIB/STM32_USB_Device_Library/Class/CustomHID|src/API/httpserver/Unused|src/API/httpserver/fs|src/APP/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/LIB/lwip_v1.3.2/src/core/ipv6|src/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/API/httpserver/Unused|src/APP/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/HID|src/API/httpserver|src/LIB/STM32_USBD_Lib/Class/CustomHID|src/APP/LIB/STM32_USB_Device_Library/Class/Template|src/BSP/AExxxxx/Comp/Unused|src/APP/LIB/FatFs/drivers/Unused|src/EQU/Unused|src/LIB/STM32_USBD_Lib/Core/Template|src/LIB/FatFs/option/unicode.c|src/LIB/lwip-1.4.1/src/include/ipv6|src/APP/LIB/STM32_USBD_Lib/Class/Template|src/LIB/STM32_USBD_Lib/Class/Template|src/LIB/lwip_v1.3.2/src/include/ipv6|src/LIB/IniParser|src/APP/LIB/STM32_USB_Device_Library/Core/Template|src/Unused|src/APP/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/CustomHID|src/LIB/STM32_USBD_Lib/Class/HID|src/UTILS/Unused|src/LIB/lwip-1.4.1/src/core/ipv6|src/LIB/lwip-1.4.1/test|src/LIB/lwip_v1.3.2|src/LIB/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USBD_Lib/Core/Template|src/APP/API/tftpserver|src/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/FatFs/drivers/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/AUDIO|src/APP/LIB/FatFs/option/unicode.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -201,7 +204,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/BSP/AExxxxx/Comp/Unused|src/LIB/IniParser|src/Unused|src/API/httpserver|src/LIB/lwip-1.4.1/test|src/LIB/lwip_v1.3.2|src/LIB/lwip-1.4.1/src/include/ipv6|src/LIB/lwip-1.4.1/src/core/ipv6|src/LIB/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/API/httpserver/fs|src/API/httpserver/Unused|src/LIB/FatFs/option/unicode.c|src/LIB/FatFs/drivers/Unused|src/LIB/STM32_USBD_Lib/Class/Template|src/LIB/STM32_USBD_Lib/Class/HID|src/LIB/STM32_USBD_Lib/Class/DFU|src/LIB/STM32_USBD_Lib/Class/CustomHID|src/LIB/STM32_USBD_Lib/Class/AUDIO|src/LIB/STM32_USBD_Lib/Core/Template|src/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/lwip_v1.3.2/src/include/ipv6|src/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USBD_Lib/Class/Template|src/APP/LIB/STM32_USBD_Lib/Class/HID|src/APP/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/CustomHID|src/APP/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/LIB/STM32_USBD_Lib/Core/Template|src/APP/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USB_Device_Library/Class/AUDIO|src/APP/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/APP/LIB/STM32_USB_Device_Library/Class/Template|src/APP/LIB/FatFs/drivers/Unused|src/APP/LIB/STM32_USB_Device_Library/Core/Template|src/EQU/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/HID|src/APP/API/httpserver/Unused|src/UTILS/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/CustomHID|src/APP/API/tftpserver|src/APP/LIB/FatFs/option/unicode.c|src/APP/LIB/STM32_USB_Device_Library/Class/DFU" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/FCT/FILES/FatFs/option/ccsbcs.c|src/FCT/ETH/lwip-1.4.1/src/core/ipv6|src/FCT/FILES/FatFs/drivers/Unused|src/FCT/ETH/lwip-1.4.1/test|src/FCT/ETH/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/BSP/STM32_USBD_Lib/Core/Template|src/BSP/STM32_USBD_Lib/Class/HID|src/BSP/STM32_USBD_Lib/Class/Template|src/BSP/STM32_USBD_Lib/Class/DFU|src/BSP/STM32_USBD_Lib/Class/CustomHID|src/BSP/STM32_USBD_Lib/Class/AUDIO|src/FCT/ETH/SERVER_HTTP|src/BSP/Comp/Unused|src/FCT/ETHERNET/SERVER_HTTP|src/FCT/ETHERNET/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/FCT/ETHERNET/lwip-1.4.1/src/core/ipv6|src/FCT/ETHERNET/lwip-1.4.1/test|src/FCT/FILE_SYSTEM/FatFs/drivers/Unused|src/FCT/USB/STM32_USBD_Lib/Class/DFU|src/FCT/USB/STM32_USBD_Lib/Class/HID|src/FCT/USB/STM32_USBD_Lib/Class/CustomHID|src/FCT/USB/STM32_USBD_Lib/Class/AUDIO|src/FCT/USB/STM32_USBD_Lib/Class/Template|src/FCT/USB/STM32_USBD_Lib/Core/Template|src/FCT/USB/LIB/STM32_USB_Device_Library/Class/DFU|src/APP/LIB/STM32_USB_Device_Library/Class/HID|src/APP/LIB/STM32_USB_Device_Library/Class/CustomHID|src/API/httpserver/Unused|src/API/httpserver/fs|src/APP/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/LIB/lwip_v1.3.2/src/core/ipv6|src/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/API/httpserver/Unused|src/APP/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/HID|src/API/httpserver|src/LIB/STM32_USBD_Lib/Class/CustomHID|src/APP/LIB/STM32_USB_Device_Library/Class/Template|src/BSP/AExxxxx/Comp/Unused|src/APP/LIB/FatFs/drivers/Unused|src/EQU/Unused|src/LIB/STM32_USBD_Lib/Core/Template|src/LIB/FatFs/option/unicode.c|src/LIB/lwip-1.4.1/src/include/ipv6|src/APP/LIB/STM32_USBD_Lib/Class/Template|src/LIB/STM32_USBD_Lib/Class/Template|src/LIB/lwip_v1.3.2/src/include/ipv6|src/LIB/IniParser|src/APP/LIB/STM32_USB_Device_Library/Core/Template|src/Unused|src/APP/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/CustomHID|src/LIB/STM32_USBD_Lib/Class/HID|src/UTILS/Unused|src/LIB/lwip-1.4.1/src/core/ipv6|src/LIB/lwip-1.4.1/test|src/LIB/lwip_v1.3.2|src/LIB/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USBD_Lib/Core/Template|src/APP/API/tftpserver|src/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/FatFs/drivers/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/AUDIO|src/APP/LIB/FatFs/option/unicode.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -261,34 +264,37 @@
 									<listOptionValue builtIn="false" value="USE_STDPERIPH_DRIVER"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.246052929" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/CMSIS/CM3/CoreSupport}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/CMSIS/CM3/DeviceSupport/ST/STM32F2xx}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/STM32F2xx_StdPeriph_Driver/inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/STM32F2xx_HAL_Driver/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp/STM32F2xx/STM32F2x7_ETH_Driver}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx/Comp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/AExxxxx}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/CMSIS/CM3/CoreSupport}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/CMSIS/CM3/DeviceSupport/ST/STM32F2xx}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32F2xx_StdPeriph_Driver/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32F2xx_HAL_Driver/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32F2x7_ETH_Driver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32_USBD_Lib/Core/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32_USBD_Lib/Class/CDC/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/STM32_USBD_Lib/Class/MSC/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP/Comp}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/BSP}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/UTILS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/EQU}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/src/include/lwip}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/src/include/netif}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/src/include/ipv4}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/port/STM32F2x7}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/port/STM32F2x7/Standalone}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/lwip-1.4.1/src/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/SERVER_HTTP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/SERVER_TELNET}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ETH/SERVER_TFTP}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/FILES}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/FILES/FatFs}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/FILES/IniParser}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/USB}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/FatFs}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/IniParser}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/STM32_USBD_Lib/Core/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/STM32_USBD_Lib/Class/CDC/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/STM32_USBD_Lib/Class/MSC/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/src/include/lwip}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/src/include/netif}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/src/include/ipv4}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/port/STM32F2x7}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/port/STM32F2x7/Standalone}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/LIB/lwip-1.4.1/src/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/API}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/API/httpserver}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/API/telnet}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/API/tftpserver}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/USB/LIB}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/ARROSAGE}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/CHAUFFAGE}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/FCT/VENTILATION}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.717725857" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.gnu99" valueType="enumerated"/>
@@ -329,7 +335,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/BSP/AExxxxx/Comp/Unused|src/LIB/IniParser|src/Unused|src/API/httpserver|src/LIB/lwip-1.4.1/test|src/LIB/lwip_v1.3.2|src/LIB/lwip-1.4.1/src/include/ipv6|src/LIB/lwip-1.4.1/src/core/ipv6|src/LIB/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/API/httpserver/fs|src/API/httpserver/Unused|src/LIB/FatFs/option/unicode.c|src/LIB/FatFs/drivers/Unused|src/LIB/STM32_USBD_Lib/Class/Template|src/LIB/STM32_USBD_Lib/Class/HID|src/LIB/STM32_USBD_Lib/Class/DFU|src/LIB/STM32_USBD_Lib/Class/CustomHID|src/LIB/STM32_USBD_Lib/Class/AUDIO|src/LIB/STM32_USBD_Lib/Core/Template|src/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/lwip_v1.3.2/src/include/ipv6|src/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USBD_Lib/Class/Template|src/APP/LIB/STM32_USBD_Lib/Class/HID|src/APP/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/CustomHID|src/APP/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/LIB/STM32_USBD_Lib/Core/Template|src/APP/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USB_Device_Library/Class/AUDIO|src/APP/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/APP/LIB/STM32_USB_Device_Library/Class/Template|src/APP/LIB/FatFs/drivers/Unused|src/APP/LIB/STM32_USB_Device_Library/Core/Template|src/EQU/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/HID|src/APP/API/httpserver/Unused|src/UTILS/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/CustomHID|src/APP/API/tftpserver|src/APP/LIB/FatFs/option/unicode.c|src/APP/LIB/STM32_USB_Device_Library/Class/DFU" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/FCT/FILES/FatFs/option/ccsbcs.c|src/FCT/ETH/lwip-1.4.1/src/core/ipv6|src/FCT/FILES/FatFs/drivers/Unused|src/FCT/ETH/lwip-1.4.1/test|src/FCT/ETH/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/BSP/STM32_USBD_Lib/Core/Template|src/BSP/STM32_USBD_Lib/Class/HID|src/BSP/STM32_USBD_Lib/Class/Template|src/BSP/STM32_USBD_Lib/Class/DFU|src/BSP/STM32_USBD_Lib/Class/CustomHID|src/BSP/STM32_USBD_Lib/Class/AUDIO|src/FCT/ETH/SERVER_HTTP|src/BSP/Comp/Unused|src/FCT/ETHERNET/SERVER_HTTP|src/FCT/ETHERNET/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/FCT/ETHERNET/lwip-1.4.1/src/core/ipv6|src/FCT/ETHERNET/lwip-1.4.1/test|src/FCT/FILE_SYSTEM/FatFs/drivers/Unused|src/FCT/USB/STM32_USBD_Lib/Class/DFU|src/FCT/USB/STM32_USBD_Lib/Class/HID|src/FCT/USB/STM32_USBD_Lib/Class/CustomHID|src/FCT/USB/STM32_USBD_Lib/Class/AUDIO|src/FCT/USB/STM32_USBD_Lib/Class/Template|src/FCT/USB/STM32_USBD_Lib/Core/Template|src/FCT/USB/LIB/STM32_USB_Device_Library/Class/DFU|src/APP/LIB/STM32_USB_Device_Library/Class/HID|src/APP/LIB/STM32_USB_Device_Library/Class/CustomHID|src/API/httpserver/Unused|src/API/httpserver/fs|src/APP/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/LIB/lwip_v1.3.2/src/core/ipv6|src/LIB/STM32_USBD_Lib/Class/AUDIO|src/APP/API/httpserver/Unused|src/APP/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/HID|src/API/httpserver|src/LIB/STM32_USBD_Lib/Class/CustomHID|src/APP/LIB/STM32_USB_Device_Library/Class/Template|src/BSP/AExxxxx/Comp/Unused|src/APP/LIB/FatFs/drivers/Unused|src/EQU/Unused|src/LIB/STM32_USBD_Lib/Core/Template|src/LIB/FatFs/option/unicode.c|src/LIB/lwip-1.4.1/src/include/ipv6|src/APP/LIB/STM32_USBD_Lib/Class/Template|src/LIB/STM32_USBD_Lib/Class/Template|src/LIB/lwip_v1.3.2/src/include/ipv6|src/LIB/IniParser|src/APP/LIB/STM32_USB_Device_Library/Core/Template|src/Unused|src/APP/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/STM32_USBD_Lib/Class/DFU|src/APP/LIB/STM32_USBD_Lib/Class/CustomHID|src/LIB/STM32_USBD_Lib/Class/HID|src/UTILS/Unused|src/LIB/lwip-1.4.1/src/core/ipv6|src/LIB/lwip-1.4.1/test|src/LIB/lwip_v1.3.2|src/LIB/lwip-1.4.1/port/STM32F2x7/FreeRTOS|src/LIB/lwip_v1.3.2/src/core/ipv6|src/APP/LIB/STM32_USBD_Lib/Core/Template|src/APP/API/tftpserver|src/LIB/lwip_v1.3.2/port/STM32F2x7/FreeRTOS|src/LIB/FatFs/drivers/Unused|src/APP/LIB/STM32_USB_Device_Library/Class/AUDIO|src/APP/LIB/FatFs/option/unicode.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

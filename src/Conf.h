@@ -1,225 +1,97 @@
-/**
- ***************************************************************************************************
- * @file	app_Parametres.h
- * @author	j.daheron
- * @version	1.0.0
- * @date	26 août 2014
- * @brief   Gestion des parametres de la carte.
- ***************************************************************************************************
- */
+/**************************************************************************************************/
+/*																								  */
+/* Conf																							  */
+/*																								  */
+/**************************************************************************************************/
+
+#ifndef CONF_H_
+#define CONF_H_
 
 
-/* Define to prevent recursive inclusion **********************************************************/
-
-#ifndef APP_PARAMETRES_H_
-#define APP_PARAMETRES_H_
-
-
-/* Includes ***************************************************************************************/
+/*--------------------------------------------------------------------------------------------------
+	PUBLIC INCLUDES
+--------------------------------------------------------------------------------------------------*/
 
 #include "BSP.h"
-#include "fct_IniFile.h"
+#include <FILES/Parametres.h>
 
 
-/** @defgroup app_Parametres app_Parametres
-  * @brief Gestion des parametres de la carte.
-  * @{
-  */ 
+/*--------------------------------------------------------------------------------------------------
+	PUBLIC DEFINE
+--------------------------------------------------------------------------------------------------*/
 
-/** 
- ***************************************************************************************************
- * @defgroup Exported_Defines Exported Defines
- * @{
- */
- 
- /**
- * @}
- */ 
- 
- 
-/** 
- ***************************************************************************************************
- * @defgroup Exported_TypesDefinitions Exported TypesDefinitions
- * @{
- */
 
-/** Liste des paramatres. */
+/*--------------------------------------------------------------------------------------------------
+	PUBLIC TYPEDEF
+--------------------------------------------------------------------------------------------------*/
+
 typedef enum
 {
+	SECTION_GENERAL				 = 0,
+	Conf_GEN_StartTempo_s			,
 
-	START_TEMPO_s				= 0,
+	SECTION_ETHERNET				,
+	Conf_ETH_IP_Adresse				,
+	Conf_ETH_IP_Masque				,
+	Conf_ETH_IP_Passerelle			,
+	Conf_ETH_MAC_Adresse			,
+	Conf_ETH_DHCP_Actif				,
 
-	CH_SEUIL_START_DegC,
-	CH_SEUIL_STOP_DegC,
-	CH_TEMPO_APRES_CH_s,
+	SECTION_CHAUFFAGE				,
+	Conf_CH_SeuilStart_DegC			,
+	Conf_CH_SeuilStop_DegC			,
+	Conf_CH_TempoApresCh_s			,
 
-	EXT_SEUIL_START_DegC,
-	EXT_SEUIL_STOP_DegC,
-	EXT_TEMPO_APRES_EXT_s,
-	EXT_ACTIVER_PENDANT_CH,
+	SECTION_EXTRACT					,
+	Conf_EXT_SeuilStart_DegC		,
+	Conf_EXT_SeuilStop_DegC			,
+	Conf_EXT_TempoApresEXT_s		,
+	Conf_EXT_ActiverPendantCh		,
 
-	LOG_PERIODE_s,
-	LOG_PERIODE_PENDANT_ACTION_s,
+	SECTION_LOG						,
+	Conf_LOG_Periode_s				,
+	Conf_LOG_PeriodePendantAction_s	,
 
-	ARROSAGE_START_HEURE			,
-	ARROSAGE_START_MINUTE			,
-	ARROSAGE_DUREE_s				,
-	ARROSAGE_VOLUME_PER_PLANT_ml	,
-	ARROSAGE_NB_PLANT				,
-	ARROSAGE_PUMP_DEBIT_ml_per_h	,
-	ARROSAGE_RESERVOIR_VOLUME_ml	,
-	ARROSAGE_RESERVOIR_RESTANT_ml	,
+	SECTION_ARROSAGE				,
+	Conf_ARR_Heure					,
+	Conf_ARR_Intervalle_h			,
+	Conf_ARR_VolumeParPlant_ml		,
+	Conf_ARR_NbPlants				,
+	Conf_ARR_DebitPompe_ml_par_h	,
+	Conf_ARR_VolumeReservoir_ml		,
+	Conf_ARR_VolumeRestant_ml		,
+	Conf_ARR_TS_Precedent			,
+	Conf_ARR_TS_Suivant				,
 
 	NB_PARAM,
-	
+
 } Param_Liste_e;
 
 
-
-
-
-/**
- * @}
- */ 
- 
- 
-/** 
- ***************************************************************************************************
- * @defgroup Exported_Macros Exported Macros 
- * @{
- */
- 
- /**
- * @}
- */ 
- 
- 
-/** 
- ***************************************************************************************************
- * @defgroup Exported_Variables Exported Variables
- * @{
- */
-
-static const Key_s ParamDefaultValue[] =
+typedef struct
 {
-		//KeyType		SectionName		KeyName						Value				MinValue			MaxValue
-		{KeyType_Int,	"START",		"Tempo_s",					(void*) (30),		(void*) (0),		(void*) (3600)				},
+	uint32_t	StartTempo_s;
+	uint32_t	LOG_Periode_s;
+	uint32_t	LOG_PeriodePendantAction_s;
 
-		{KeyType_Int,	"CHAUFFAGE",	"SeuilStart_DegC",			(void*) (22),		(void*) (10),		(void*) (50)				},
-		{KeyType_Int,	"CHAUFFAGE",	"SeuilStop_DegC",			(void*) (25),		(void*) (10),		(void*) (50)				},
-		{KeyType_Int,	"CHAUFFAGE",	"TempoApresCh_s",			(void*) (30),		(void*) (0),		(void*) (3600)				},
-
-		{KeyType_Int,	"EXTRACT",		"SeuilStart_DegC",			(void*) (26),		(void*) (10),		(void*) (50)				},
-		{KeyType_Int,	"EXTRACT",		"SeuilStop_DegC",			(void*) (24),		(void*) (10),		(void*) (50)				},
-		{KeyType_Int,	"EXTRACT",		"TempoApresEXT_s",			(void*) (15),		(void*) (0),		(void*) (3600)				},
-		{KeyType_Int,	"EXTRACT",		"ActiverPendantCh",			(void*) (0),		(void*) (0),		(void*) (1)					},
-
-		{KeyType_Int,	"LOG",			"Periode_s",				(void*) (60),		(void*) (5),		(void*) (3600)				},
-		{KeyType_Int,	"LOG",			"PeriodePendantAction_s",	(void*) (60),		(void*) (5),		(void*) (3600)				},
-
-		{KeyType_Int,	"ARROSAGE",		"Start_Heure",				(void*) (20),		(void*) (0),		(void*) (24)				},
-		{KeyType_Int,	"ARROSAGE",		"Start_Minute",				(void*) (00),		(void*) (0),		(void*) (60)				},
-		{KeyType_Int,	"ARROSAGE",		"Duree_s",					(void*) (0),		(void*) (0),		(void*) (24)				},
-		{KeyType_Int,	"ARROSAGE",		"VolumePerPlant_ml",		(void*) (0),		(void*) (0),		(void*) (1000000)			},
-		{KeyType_Int,	"ARROSAGE",		"NbPlant",					(void*) (0),		(void*) (0),		(void*) (100)				},
-		{KeyType_Int,	"ARROSAGE",		"Pump_Debit_ml_per_h",		(void*) (12300),	(void*) (100),		(void*) (1000000)			},
-		{KeyType_Int,	"ARROSAGE",		"Reservoir_Volume_ml",		(void*) (4000),		(void*) (100),		(void*) (1000000)			},
-		{KeyType_Int,	"ARROSAGE",		"Reservoir_Restant_ml",		(void*) (0),		(void*) (0),		(void*) (1000000)			},
-};
-
-static const IniFile_s Param_IniFile = {
-		.FileName	= "PARAM.ini",
-		.KeyTable	= ParamDefaultValue,
-		.NbKey		= NB_PARAM,
-};
-
- /**
- * @}
- */ 
-
- 
-/** 
- ***************************************************************************************************
- * @defgroup Exported_Functions Exported Functions  
- * @{
- */
-
-void FCT_VALIDATION_APP_PARAMETRES();
-
-/**
- * @brief	Initialisation des parametre.
- * @return 	void
- */
-Status_e
-Parametres_Init(
-	void
-);
-
-/**
- * @brief	Ouverture du fichier de parametre
- * @return 	Status (OK/KO)
- */
-Status_e
-Parametres_OpenReadFile(
-	void
-);
-
-/**
- * @brief	Fermeture du fichier de parametre
- * @return 	Status (OK/KO)
- */
-Status_e
-Parametres_CloseFile(
-	void
-);
-
-/**
- * @brief	Lecture d'un parametre.
- * @return 	Status (OK/KO)
- */
-Status_e
-Parametres_Read(
-		Param_Liste_e NumParam,	/**<[in] Numero du parametre.*/
-		void* pValue			/**<[out] Valeur lue.*/
-);
-
-/**
- * @brief	Ecriture d'un parametre.
- * @return 	Status (OK/KO)
- */
-Status_e
-Parametres_Write(
-		Param_Liste_e NumParam,	/**<[in] Numero du parametre.*/
-		void* Value				/**<[in] Valeur a ecrire.*/
-);
-
-/**
- * @brief	Ecriture d'une donnee dans la Table des donnees courante.
- * @return 	Status (OK/KO)
- */
-Status_e
-Parametres_EcrireDonnee(
-		uint8_t	 	NumData,	/**<[in] Numero de la donnee.*/
-		void* 		value		/**<[in] Valeur a ecrire (valeur de l'entier ou pointeur vers la chaine).*/
-);
-
-/**
- * @brief	Ecriture d'un  fichier de donnees Table.
- * @return 	Status (OK/KO)
- */
-Status_e
-Parametres_EcrireFichier(
-	void
-);
- /**
- * @}
- */
+} Conf_t;
 
 
- /**
- * @}
- */
+/*--------------------------------------------------------------------------------------------------
+	PUBLIC VARIABLE
+--------------------------------------------------------------------------------------------------*/
+
+extern const IniFile_s Conf_IniFile;
 
 
-#endif /* APP_PARAMETRES_H_ */
+/*--------------------------------------------------------------------------------------------------
+	PUBLIC FUNCTION PROTOTYPE
+--------------------------------------------------------------------------------------------------*/
+
+void 	Conf_Init(void);
+void 	Conf_Write(uint32_t NumParam, void* Value);
+Conf_t*	Conf_Get(void);
+
+
+#endif /* CONF_H_ */
 

@@ -14,7 +14,6 @@
 #include "stm32f2xx_it.h"
 #include "stm32f2xx_hal.h"
 #include "util_printf.h"
-#include "main.h"
 
 
 /* External variables --------------------------------------------------------*/

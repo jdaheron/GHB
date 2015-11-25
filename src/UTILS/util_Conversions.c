@@ -230,4 +230,31 @@ void Conv_VersionSW_to_VClient(char* VersionSw, char* VersionClient)
 }
 
 
+/**-----------------------------------------------------------------------------
+ *
+ */
+uint8_t Conv_ParseString(char* Str, char Delimiter, char** ParsedStr)
+{
+	uint8_t iParsedStr = 0;
+
+
+	ParsedStr[iParsedStr++] = Str;
+	while (*Str != 0)
+	{
+		if (*Str == Delimiter)
+		{
+			*Str = 0;
+			if ((Str[1] != 0) && (Str[1] != Delimiter))
+			{
+				ParsedStr[iParsedStr++] = ++Str;
+			}
+		}
+		Str++;
+	}
+
+	return iParsedStr;
+}
+
+
+
 

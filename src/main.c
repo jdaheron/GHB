@@ -12,8 +12,6 @@
 /* Includes ***************************************************************************************/
 
 #include "fct_TempHygro.h"
-#include "fct_MemoireFAT.h"
-#include "drivers/drv_SdCard_SPI.h"
 #include "api_USB.h"
 
 //#include "equ_Hygrometre.h"
@@ -24,20 +22,24 @@
 #include "util_Goto.h"
 #include "util_LogFile.h"
 
-#include "main.h"
+#include <FILES/fct_MemoireFAT.h>
+#include <FILES/FatFs/drivers/drv_SdCard_SPI.h>
+
 #include "Conf.h"
-#include "stm32f2x7_eth.h"
-#include "netconf.h"
-#include "httpd.h"
-#include "telnet.h"
-#include "tftpserver.h"
+#include "Arrosage.h"
+#include "Chauffage.h"
+#include "Ethernet.h"
+#include "Ventilation.h"
+
+
 #include "Terminal.h"
+#include "Terminal_Cmd.h"
 #include "if_PC.h"
 
 
 /* External Variables *****************************************************************************/
 
-const char VERSION_SW[] = {"00001AAG"};
+const char VERSION_SW[] = {"00001ZAG"};
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
 #ifdef DEBUG_AVEC_BL
@@ -112,63 +114,20 @@ typedef enum
  * @{
  */
 
-static Mode_e Mode = MODE_DEMARRAGE;
-static Mode_e LastMode = 0xFF;
-static ModeFct_e ModeFct = MODE_FCT_SERVEUR;
-static TSW_s TmrAffichTempHygro;
-static TSW_s Tmr_LOG;
-static TSW_s Tmr_START;
-static TSW_s Tmr_CH;
-static TSW_s Tmr_EXT;
-static TSW_s Tmr_RTC;
-static TSW_s Tmr_ARROSAGE;
-static Etat_e EtatVentillation = Etat_INACTIF;
-static Etat_e EtatChauffage = Etat_INACTIF;
-static Etat_e EtatArrosage = Etat_INACTIF;
+static Mode_e		Mode = MODE_DEMARRAGE;
+static Mode_e		LastMode = 0xFF;
+static ModeFct_e	ModeFct = MODE_FCT_SERVEUR;
+static TSW_s		TmrAffichTempHygro;
+static TSW_s		Tmr_LOG;
+static TSW_s		Tmr_START;
+static TSW_s		Tmr_CH;
+static TSW_s		Tmr_EXT;
+static TSW_s		Tmr_RTC;
+static Etat_e		EtatVentillation = Etat_INACTIF;
+static Etat_e		EtatChauffage = Etat_INACTIF;
+static float		Temperature = 0;
+static float		Hygrometrie = 0;
 
-#if 0
-static uint8_t START_Tempo_s				= 30;
-
-static uint8_t CH_SeuilStart_DegC			= 22;
-static uint8_t CH_SeuilStop_DegC			= 25;
-static uint8_t CH_TempoApresCh_s			= 30;
-
-static uint8_t EXT_SeuilStop_DegC			= 24;
-static uint8_t EXT_SeuilStart_DegC			= 26;
-static uint8_t EXT_TempoApresEXT_s			= 15;
-static uint16_t	EXT_ActiverPendantChauffage	= FALSE;
-
-static uint16_t	LOG_Periode_s				= 60;
-#else
-static uint32_t START_Tempo_s				= 0;
-
-static uint32_t CH_SeuilStart_DegC			= 0;
-static uint32_t CH_SeuilStop_DegC			= 0;
-static uint32_t CH_TempoApresCh_s			= 0;
-
-static uint32_t EXT_SeuilStop_DegC			= 0;
-static uint32_t EXT_SeuilStart_DegC			= 0;
-static uint32_t EXT_TempoApresEXT_s			= 0;
-static uint32_t	EXT_ActiverPendantChauffage	= 1;
-
-static float Temperature = 0;
-static float Hygrometrie = 0;
-
-static uint32_t	LOG_Periode_s				= 0;
-static uint32_t	LOG_PeriodePendantAction_s	= 0;
-
-static uint32_t	ARR_Start_Heure             = 0;
-static uint32_t	ARR_Start_Minute            = 0;
-static uint32_t	ARR_Duree_s                 = 0;
-static uint32_t	ARR_VolumePerPlant_ml       = 0;
-static uint32_t	ARR_NbPlant                 = 0;
-static uint32_t	ARR_Pump_Debit_ml_per_h     = 0;
-static uint32_t	ARR_Reservoir_Volume_ml     = 0;
-static uint32_t	ARR_Reservoir_Restant_ml    = 0;
-
-
-#endif
-  	
 	
 /** 
  ***************************************************************************************************
@@ -189,7 +148,7 @@ void LifeBit_Main()
 		{
 			TSW_Start(&Tmr_LifeBit, 10);
 			Etat = Etat_ACTIF;
-			_printf("lb\n");
+			//_printf("lb\n");
 		}
 		else
 		{
@@ -220,14 +179,14 @@ void LogData()
 	if (TempHygro_IsValide() == FALSE)
 	{
 		_sprintf(LogBuffer, "%d;%d;%d;%d;%.01f;%.01f;",
-				Mode, EtatVentillation, EtatChauffage, EtatArrosage,
+				Mode, EtatVentillation, EtatChauffage, Arrosage_Get()->Etat,
 				-100, -100
 		);
 	}
 	else
 	{
 		_sprintf(LogBuffer, "%d;%d;%d;%d;%.01f;%.01f;",
-				Mode, EtatVentillation, EtatChauffage, EtatArrosage,
+				Mode, EtatVentillation, EtatChauffage, Arrosage_Get()->Etat,
 				Temperature, Hygrometrie
 		);
 	}
@@ -237,104 +196,16 @@ void LogData()
 
 	if ((Mode == MODE_CHAUFFAGE)
 	||	(Mode == MODE_VENTILLATION)
-	||	(EtatArrosage == Etat_INACTIF))
+	||	(Arrosage_Get()->Etat == Etat_INACTIF))
 	{
-		TSW_Start(&Tmr_LOG, 1000 * LOG_PeriodePendantAction_s);
+		TSW_Start(&Tmr_LOG, 1000 * Conf_Get()->LOG_PeriodePendantAction_s);
 	}
 	else
 	{
-		TSW_Start(&Tmr_LOG, 1000 * LOG_Periode_s);
+		TSW_Start(&Tmr_LOG, 1000 * Conf_Get()->LOG_Periode_s);
 	}
 }
 
-
-/**************************************************************************************************/
-void Conf_Init()
-{
-//	Status_e Status;
-	//void (*pRead)(Param_Liste_e NumParam, void* pValue);
-
-#if 0
-	Status = Parametres_Init();
-	if (Status != Status_OK)
-	{
-		_printf("Conf forced to default value\n");
-		pRead = Parametres_ReadDefaultValue;
-	}
-	else
-	{
-		Parametres_OpenReadFile();
-		pRead = Parametres_Read;
-	}
-
-	pRead(START_TEMPO_s, &START_Tempo_s);
-
-	pRead(CH_SEUIL_START_DegC,			&CH_SeuilStart_DegC);
-	pRead(CH_SEUIL_STOP_DegC,			&CH_SeuilStop_DegC);
-	pRead(CH_TEMPO_APRES_CH_s,			&CH_TempoApresCh_s);
-
-	pRead(EXT_SEUIL_START_DegC,			&EXT_SeuilStart_DegC);
-	pRead(EXT_SEUIL_STOP_DegC,			&EXT_SeuilStop_DegC);
-	pRead(EXT_TEMPO_APRES_EXT_s, 		&EXT_TempoApresEXT_s);
-	pRead(EXT_ACTIVER_PENDANT_CH, 		&EXT_ActiverPendantChauffage);
-
-	pRead(LOG_PERIODE_s, 				&LOG_Periode_s);
-	pRead(LOG_PERIODE_PENDANT_ACTION_s, &LOG_PeriodePendantAction_s);
-
-	if (Status != Status_OK)
-	{
-		Parametres_CloseFile();
-	}
-#else
-	if (Parametres_Init() != Status_OK)
-	{
-		_printf("Conf forced to default value\n");
-	}
-	Parametres_OpenReadFile();
-	Parametres_Read(START_TEMPO_s, 					&START_Tempo_s);
-
-	Parametres_Read(CH_SEUIL_START_DegC,			&CH_SeuilStart_DegC);
-	Parametres_Read(CH_SEUIL_STOP_DegC,				&CH_SeuilStop_DegC);
-	Parametres_Read(CH_TEMPO_APRES_CH_s,			&CH_TempoApresCh_s);
-
-	Parametres_Read(EXT_SEUIL_START_DegC,			&EXT_SeuilStart_DegC);
-	Parametres_Read(EXT_SEUIL_STOP_DegC,			&EXT_SeuilStop_DegC);
-	Parametres_Read(EXT_TEMPO_APRES_EXT_s, 			&EXT_TempoApresEXT_s);
-	Parametres_Read(EXT_ACTIVER_PENDANT_CH, 		&EXT_ActiverPendantChauffage);
-
-	Parametres_Read(LOG_PERIODE_s, 					&LOG_Periode_s);
-	Parametres_Read(LOG_PERIODE_PENDANT_ACTION_s, 	&LOG_PeriodePendantAction_s);
-
-	Parametres_Read(ARROSAGE_START_HEURE			,	&ARR_Start_Heure           );
-	Parametres_Read(ARROSAGE_START_MINUTE			,	&ARR_Start_Minute          );
-	Parametres_Read(ARROSAGE_DUREE_s				,	&ARR_Duree_s               );
-	Parametres_Read(ARROSAGE_VOLUME_PER_PLANT_ml	,	&ARR_VolumePerPlant_ml     );
-	Parametres_Read(ARROSAGE_NB_PLANT				,	&ARR_NbPlant               );
-	Parametres_Read(ARROSAGE_PUMP_DEBIT_ml_per_h	,	&ARR_Pump_Debit_ml_per_h   );
-	Parametres_Read(ARROSAGE_RESERVOIR_VOLUME_ml	,	&ARR_Reservoir_Volume_ml   );
-	Parametres_Read(ARROSAGE_RESERVOIR_RESTANT_ml	,	&ARR_Reservoir_Restant_ml  );
-
-	Parametres_CloseFile();
-#endif
-	_printf("START_Tempo_s               =%d\n",	START_Tempo_s				);
-	_printf("CH_SeuilStart_DegC          =%d\n",	CH_SeuilStart_DegC			);
-	_printf("CH_SeuilStop_DegC           =%d\n",	CH_SeuilStop_DegC			);
-	_printf("CH_TempoApresCh_s           =%d\n",	CH_TempoApresCh_s			);
-	_printf("EXT_SeuilStart_DegC         =%d\n",	EXT_SeuilStart_DegC			);
-	_printf("EXT_SeuilStop_DegC          =%d\n",	EXT_SeuilStop_DegC			);
-	_printf("EXT_TempoApresEXT_s         =%d\n",	EXT_TempoApresEXT_s			);
-	_printf("EXT_ActiverPendantChauffage =%d\n",	EXT_ActiverPendantChauffage	);
-	_printf("LOG_Periode_s               =%d\n",	LOG_Periode_s				);
-	_printf("LOG_PeriodePendantAction_s  =%d\n",	LOG_PeriodePendantAction_s	);
-	_printf("ARR_Start_Heure             =%d\n",	ARR_Start_Heure             );
-	_printf("ARR_Start_Minute            =%d\n",	ARR_Start_Minute            );
-	_printf("ARR_Duree_s                 =%d\n",	ARR_Duree_s                 );
-	_printf("ARR_VolumePerPlant_ml       =%d\n",	ARR_VolumePerPlant_ml       );
-	_printf("ARR_NbPlant                 =%d\n",	ARR_NbPlant                 );
-	_printf("ARR_Pump_Debit_ml_per_h     =%d\n",	ARR_Pump_Debit_ml_per_h     );
-	_printf("ARR_Reservoir_Volume_ml     =%d\n",	ARR_Reservoir_Volume_ml     );
-	_printf("ARR_Reservoir_Restant_ml    =%d\n",	ARR_Reservoir_Restant_ml    );
-}
 
 
 /**************************************************************************************************/
@@ -353,7 +224,7 @@ Status_e Mode_Demarrage(void)
 
 			EtatVentillation	= Etat_INACTIF;
 			EtatChauffage		= Etat_INACTIF;
-			EtatArrosage		= Etat_INACTIF;
+			GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
 
 			Etape++;
 			break;
@@ -364,7 +235,7 @@ Status_e Mode_Demarrage(void)
 
 			EtatVentillation	= Etat_ACTIF;
 			EtatChauffage		= Etat_INACTIF;
-			EtatArrosage		= Etat_INACTIF;
+			GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
 
 			TSW_Start(&Tmr_START, 5000);
 
@@ -381,7 +252,7 @@ Status_e Mode_Demarrage(void)
 
 			EtatVentillation	= Etat_INACTIF;
 			EtatChauffage		= Etat_ACTIF;
-			EtatArrosage		= Etat_INACTIF;
+			GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
 
 			TSW_Start(&Tmr_START, 5000);
 
@@ -397,7 +268,7 @@ Status_e Mode_Demarrage(void)
 
 			EtatVentillation	= Etat_INACTIF;
 			EtatChauffage		= Etat_INACTIF;
-			EtatArrosage		= Etat_ACTIF;
+			GPIO_Set(Arrosage_Get()->GPIO, Etat_ACTIF);
 
 			TSW_Start(&Tmr_START, 5000);
 
@@ -413,7 +284,7 @@ Status_e Mode_Demarrage(void)
 
 			EtatVentillation	= Etat_INACTIF;
 			EtatChauffage		= Etat_INACTIF;
-			EtatArrosage		= Etat_INACTIF;
+			GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
 
 			TSW_Start(&Tmr_START, 10000);
 
@@ -612,49 +483,33 @@ int main(void)
 	// FONCTIONNALITES
 	MemoireFAT_Init((Diskio_drvTypeDef*) &SdCard_SPI_Driver);
 	TempHygro_Init(TEMPERATURE_PERIODE_ACQUISITION_ms);
-	Conf_Init();
 //	Hygrometre_Init();
+	Conf_Init();
+	Arrosage_Init();
+	Chauffage_Init();
+	Ventilation_Init();
 	LogInit();
-	#if USE_ETHERNET_AND_USB
-		if (RTC_BkpRegister_Read(0) == 0)
-		{
-			_printf("MODE_FCT_SERVEUR\n");
-			ModeFct = MODE_FCT_SERVEUR;
-
-			//MemoireFAT_PrintFileList("httpserver");
-
-			/* configure ethernet (GPIOs, clocks, MAC, DMA) */
-			ETH_BSP_Config();
-
-			/* Initilaize the LwIP stack */
-			LwIP_Init();
-
-			/* TFTP server Init */
-			tftpd_init();
-
-			/* Http webserver Init */
-		//	httpd_init();
-
-			telnet_init();
-		}
-		else
-		{
-			_printf("MODE_FCT_USB\n");
-			ModeFct = MODE_FCT_USB;
-//			USB_Init((Diskio_drvTypeDef*) &SdCard_SPI_Driver);
-			RTC_BkpRegister_Write(0, 0);
-		}
-	#endif
-
-
-	TSW_Start(&TmrAffichTempHygro, 3000);
-	TSW_Start(&Tmr_RTC, 10000);
-	TSW_Start(&Tmr_ARROSAGE, 1000000);
-
 
 	PC_Init();
 	Terminal_Init();
+	Terminal_Cmd_Init();
 
+	//_printf("MODE_FCT_SERVEUR\n");
+	ModeFct = MODE_FCT_SERVEUR;
+	//MemoireFAT_PrintFileList("httpserver");
+	Ethernet_Init();
+
+	if (RTC_BkpRegister_Read(0) != 0)
+	{
+		_printf("MODE_FCT_USB\n");
+		ModeFct = MODE_FCT_USB;
+		//USB_Init((Diskio_drvTypeDef*) &SdCard_SPI_Driver);
+		RTC_BkpRegister_Write(0, 0);
+	}
+
+	// Lancement des timers
+	TSW_Start(&TmrAffichTempHygro, 3000);
+	TSW_Start(&Tmr_RTC, 10000);
 
 	//Mode_Test();
 
@@ -672,30 +527,17 @@ int main(void)
 				PC_Write(BufferOut, strlen(BufferOut));
 		}
 
-		#if USE_ETHERNET_AND_USB
-			if (ModeFct == MODE_FCT_SERVEUR)
-			{
-				/* check if any packet received */
-				if (ETH_CheckFrameReceived())
-				{
-					/* process received ethernet packet */
-					LwIP_Pkt_Handle();
-				}
 
-				/* handle periodic timers for LwIP */
-				LwIP_Periodic_Handle(TSW_GetTimestamp_ms());
-			}
 
-			// Choix du mode de fonctionnement
-			// WKUP = ACTIF -> USB  -  WKUP = INACTIF -> WebServer
-			//if (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
-			//{
-			//	RTC_BkpRegister_Write(0, 1);
-			//	while (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
-			//		TSW_Delay(100);
-			//	GOTO(0);
-			//}
-		#endif
+		// Choix du mode de fonctionnement
+		// WKUP = ACTIF -> USB  -  WKUP = INACTIF -> WebServer
+		//if (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
+		//{
+		//	RTC_BkpRegister_Write(0, 1);
+		//	while (GPIO_Get(PORT_WKUP) == Etat_ACTIF)
+		//		TSW_Delay(100);
+		//	GOTO(0);
+		//}
 
 		//----------------------------------
 		// PROCESSUS
@@ -703,6 +545,19 @@ int main(void)
 		RTC_Main();
 		MemoireFAT_Main();
 		TempHygro_Thread();
+
+		if (Mode != MODE_DEMARRAGE)
+		{
+			Arrosage_Management();
+			Chauffage_Management();
+			Ventilation_Management();
+		}
+
+		if (ModeFct == MODE_FCT_SERVEUR)
+		{
+			Ethernet_Management();
+		}
+
 
 		//----------------------------------
 		// LECTURE TEMPERATURE
@@ -723,29 +578,12 @@ int main(void)
 			RTC_Lire(&Time);
 			TSW_ReStart(&Tmr_RTC);
 
-			_printf("RTC = %d-%02d-%02d %02d:%02d:%02d;%08d;",
-							Time.Annee, Time.Mois, Time.Jour,
-							Time.Heure, Time.Minute, Time.Seconde,
-							TSW_GetTimestamp_ms());
+			//_printf("RTC = %d-%02d-%02d %02d:%02d:%02d;%08d;",
+			//				Time.Annee, Time.Mois, Time.Jour,
+			//				Time.Heure, Time.Minute, Time.Seconde,
+			//				TSW_GetTimestamp_ms());
 		}
 
-
-		//----------------------------------
-		// ARROSAGE
-		if ((Time.Heure == ARR_Start_Heure)
-		&&	(Time.Minute == ARR_Start_Minute)
-		&&	(ARR_Duree_s != 0)
-		&&	(TSW_GetElapsedTime(&Tmr_ARROSAGE) > (1000 * 40)))
-		{
-			TSW_Start(&Tmr_ARROSAGE, ARR_Duree_s * 1000);
-			EtatArrosage = Etat_ACTIF;
-		}
-		if ((EtatArrosage == Etat_ACTIF)
-		&&	(TSW_IsFinished(&Tmr_ARROSAGE)))
-		{
-			TSW_Start(&Tmr_ARROSAGE, 1000000);
-			EtatArrosage = Etat_INACTIF;
-		}
 
 		//----------------------------------
 		// AFFICHAGE TEMPERATURE
@@ -773,7 +611,9 @@ int main(void)
 			NouveauMode = TRUE;
 		}
 		else
+		{
 			NouveauMode = FALSE;
+		}
 
 		//----------------------------------
 		// LOG
@@ -808,18 +648,20 @@ int main(void)
 					EtatChauffage = Etat_INACTIF;
 				}
 
-				// Pas de chauffage dessuite après l'extraction
-				if ((Temperature < CH_SeuilStart_DegC)
-				&&	(TSW_IsRunning(&Tmr_EXT) == FALSE))
-				{
-					Mode = MODE_CHAUFFAGE;
-				}
-
-				// Pas d'extraction dessuite après le chauffage
-				if ((Temperature >= EXT_SeuilStart_DegC)
+				if ((TSW_IsRunning(&Tmr_EXT) == FALSE)
 				&&	(TSW_IsRunning(&Tmr_CH) == FALSE))
 				{
-					Mode = MODE_VENTILLATION;
+					// Pas de chauffage dessuite après l'extraction
+					if (Temperature < Chauffage_Get()->SeuilStart_DegC)
+					{
+						Mode = MODE_CHAUFFAGE;
+					}
+
+					// Pas d'extraction dessuite après le chauffage
+					if (Temperature >= Ventilation_Get()->SeuilStart_DegC)
+					{
+						Mode = MODE_VENTILLATION;
+					}
 				}
 
 				break;
@@ -832,7 +674,7 @@ int main(void)
 				{
 					_printf("----- MODE_CHAUFFAGE -----\n");
 
-					if (EXT_ActiverPendantChauffage)
+					if (Ventilation_Get()->ActiverPendantChauffage)
 						EtatVentillation = Etat_ACTIF;
 					else
 						EtatVentillation = Etat_INACTIF;
@@ -840,11 +682,11 @@ int main(void)
 				}
 
 				// Attente franchissement seuil
-				if (Temperature >= CH_SeuilStop_DegC)
+				if (Temperature >= Chauffage_Get()->SeuilStop_DegC)
 				{
 					EtatChauffage = Etat_INACTIF;
 
-					TSW_Start(&Tmr_CH, 1000 * CH_TempoApresCh_s);
+					TSW_Start(&Tmr_CH, 1000 * Chauffage_Get()->TempoApresCh_s);
 					Mode = MODE_SURVEILLANCE;
 				}
 
@@ -861,11 +703,11 @@ int main(void)
 					EtatVentillation = Etat_ACTIF;
 				}
 
-				if (Temperature < EXT_SeuilStop_DegC)
+				if (Temperature < Ventilation_Get()->SeuilStop_DegC)
 				{
 					EtatVentillation = Etat_INACTIF;
 
-					TSW_Start(&Tmr_EXT, 1000 * EXT_TempoApresEXT_s);
+					TSW_Start(&Tmr_EXT, 1000 * Ventilation_Get()->TempoApresEXT_s);
 					Mode = MODE_SURVEILLANCE;
 				}
 
@@ -880,7 +722,7 @@ int main(void)
 
 					EtatVentillation 	= Etat_INACTIF;
 					EtatChauffage		= Etat_INACTIF;
-					EtatArrosage		= Etat_INACTIF;
+					Arrosage_Stop();
 				}
 				else
 				{
@@ -905,13 +747,6 @@ int main(void)
 		{
 			_printf("Chauffage = %d\n", EtatChauffage);
 			GPIO_Set(PORT_RELAIS_CH, EtatChauffage);
-			//LogData();
-		}
-
-		if (GPIO_Get(PORT_RELAIS_OPT1) != EtatArrosage)
-		{
-			_printf("Arrosage = %d\n", EtatArrosage);
-			GPIO_Set(PORT_RELAIS_OPT1, EtatArrosage);
 			//LogData();
 		}
 	}

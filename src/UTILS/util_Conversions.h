@@ -42,6 +42,7 @@ int32_t		Conv_float_to_int32(float value);
 int32_t		Conv_Arrondir_int(int32_t value, int32_t diviseur);
 float		Conv_Absolu_float(float value);
 void		Conv_VersionSW_to_VClient(char* VersionSw, char* VersionClient);
+uint8_t		Conv_ParseString(char* Str, char Delimiter, char** ParsedStr);
 
 
 #endif /* UTIL_CONVERSIONS_H_ */

@@ -1,395 +1,133 @@
-/**
- ***************************************************************************************************
- * @file	app_Parametres.c
- * @author	j.daheron
- * @version	1.0.0
- * @date	26 août 2014
- * @brief   Gestion des parametres de la carte.
- ***************************************************************************************************
- */
+/**************************************************************************************************/
+/*																								  */
+/* Conf																							  */
+/*																								  */
+/**************************************************************************************************/
 
 
-/* Includes ***************************************************************************************/
+/*--------------------------------------------------------------------------------------------------
+	INCLUDES
+--------------------------------------------------------------------------------------------------*/
 
 #include "Conf.h"
-
-
-/* External Variables *****************************************************************************/
-
-
-/** @addtogroup app_Parametres
-  * @{
-  */ 
-
- 
- /** 
- ***************************************************************************************************
- * @defgroup Private_TypesDefinitions Private TypesDefinitions
- * @{
- */
-
-/**
- * @}
- */ 
-
- 
- /** 
- ***************************************************************************************************
- * @defgroup Private_Defines Private Defines
- * @{
- */
- 
-#define DATA_STR_MAX_SIZE		32
-
-
-/**
- * @}
- */ 
-
- 
- /** 
- ***************************************************************************************************
- * @defgroup Private_Macros Private Macros
- * @{
- */
-  
-/**
- * @}
- */ 
-
-  
- /** 
- ***************************************************************************************************
- * @defgroup Private_FunctionPrototypes Private FunctionPrototypes
- * @{
- */
-
-/**
- * @}
- */ 
- 
- 
-  /** 
- ***************************************************************************************************
- * @defgroup Private_Variables Private Variables
- * @{
- */
-
-
-static char ParamCurrentValue[NB_PARAM][DATA_STR_MAX_SIZE] = {{0},{0}};
-
-
-/**
- * @}
- */
-
-
-/**
- ***************************************************************************************************
- * @defgroup Private_Functions Private Functions
- * @{
- */
-
- /**
- * @}
- */
-
-
-#define  VALIDATION_APP_PARAMETRES 0
-
-#if VALIDATION_APP_PARAMETRES
-
 #include "util_printf.h"
+#include "drv_CAT24AA16.h"
 
-void FCT_VALIDATION_APP_PARAMETRES()
+
+/*--------------------------------------------------------------------------------------------------
+	PRIVATE DEFINE
+--------------------------------------------------------------------------------------------------*/
+
+
+/*--------------------------------------------------------------------------------------------------
+	PRIVATE TYPEDEF
+--------------------------------------------------------------------------------------------------*/
+
+
+/*--------------------------------------------------------------------------------------------------
+	PRIVATE DATA DECLARATION
+--------------------------------------------------------------------------------------------------*/
+
+static const Key_s ParamDefaultValue[] =
 {
-	Status_e Status;
-	uint32_t UNIT = 100;
-	uint32_t AUTO_OFF = 100;
-	uint32_t AUTO_OFF_BT = 100;
-	uint32_t LANGUE = 100;
-	uint32_t ACTIV_ALS = 100;
-	char TEST_STR[256] = {"AZERTY"};
+		//KeyType				SectionName		KeyName						Value						MinValue			MaxValue
 
-	f_unlink(Param_IniFile.FileName);
+		{KeyType_SectionName,	"GENERAL",		"",							(void*) (0),				(void*) (0),		(void*) (0)					},
+		{KeyType_Int,			"GENERAL",		"StartTempo_s",				(void*) (30),				(void*) (0),		(void*) (3600)				},
 
-	Parametres_Init();
+		{KeyType_SectionName,	"ETHERNET",		"",							(void*) (0),				(void*) (0),		(void*) (0)					},
+		{KeyType_Str,			"ETHERNET",		"IP_Adresse",				(void*) "192.168.1.200",	(void*) (0),		(void*) (0)					},
+		{KeyType_Str,			"ETHERNET",		"IP_Masque",				(void*) "255.255.255.0",	(void*) (0),		(void*) (0)					},
+		{KeyType_Str,			"ETHERNET",		"IP_Passerelle",			(void*) "192.168.1.254",	(void*) (0),		(void*) (0)					},
+		{KeyType_Str,			"ETHERNET",		"MAC_Adresse",				(void*) "00:00:00:00:00:01",(void*) (0),		(void*) (0)					},
+		{KeyType_Int,			"ETHERNET",		"DHCP_Actif",				(void*) (0),				(void*) (0),		(void*) (1)					},
 
-	char buffer[100] = {0};
-	strcpy(buffer, Param_IniFile.FileName);
-	strcat(buffer, "~\0");
+		{KeyType_SectionName,	"CHAUFFAGE",	"",							(void*) (0),				(void*) (0),		(void*) (0)					},
+		{KeyType_Int,			"CHAUFFAGE",	"SeuilStart_DegC",			(void*) (22),				(void*) (10),		(void*) (50)				},
+		{KeyType_Int,			"CHAUFFAGE",	"SeuilStop_DegC",			(void*) (25),				(void*) (10),		(void*) (50)				},
+		{KeyType_Int,			"CHAUFFAGE",	"TempoApresCh_s",			(void*) (30),				(void*) (0),		(void*) (3600)				},
 
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
-//	MemoireFAT_PrintFile(buffer);
+		{KeyType_SectionName,	"EXTRACT",		"",							(void*) (0),				(void*) (0),		(void*) (0)					},
+		{KeyType_Int,			"EXTRACT",		"SeuilStart_DegC",			(void*) (26),				(void*) (10),		(void*) (50)				},
+		{KeyType_Int,			"EXTRACT",		"SeuilStop_DegC",			(void*) (24),				(void*) (10),		(void*) (50)				},
+		{KeyType_Int,			"EXTRACT",		"TempoApresEXT_s",			(void*) (15),				(void*) (0),		(void*) (3600)				},
+		{KeyType_Int,			"EXTRACT",		"ActiverPendantCh",			(void*) (0),				(void*) (0),		(void*) (1)					},
 
-	Status = Parametres_Read(PARAM_UNIT, &UNIT);
-	Status = Parametres_Read(PARAM_AUTO_OFF, &AUTO_OFF);
-	Status = Parametres_Read(PARAM_BOARD_SN, &TEST_STR);
-/*
-	//---------------------------------------
-	UNIT = 0;
-	Status = Parametres_Write(PARAM_UNIT, (void*) UNIT);
-	Status = Parametres_Read(PARAM_UNIT, &UNIT);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
+		{KeyType_SectionName,	"LOG",			"",							(void*) (0),				(void*) (0),		(void*) (0)					},
+		{KeyType_Int,			"LOG",			"Periode_s",				(void*) (60),				(void*) (5),		(void*) (3600)				},
+		{KeyType_Int,			"LOG",			"PeriodePendantAction_s",	(void*) (60),				(void*) (5),		(void*) (3600)				},
 
-	UNIT = 123;
-	Status = Parametres_Write(PARAM_UNIT, (void*) UNIT);
-	Status = Parametres_Read(PARAM_UNIT, &UNIT);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
-
-	UNIT = 987;
-	Status = Parametres_Write(PARAM_UNIT, (void*) UNIT);
-	Status = Parametres_Read(PARAM_UNIT, &UNIT);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
-*/
-	//---------------------------------------
-	AUTO_OFF = 0;
-	Status = Parametres_Write(PARAM_AUTO_OFF, (void*) AUTO_OFF);
-	Status = Parametres_Read(PARAM_AUTO_OFF, &AUTO_OFF);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
-
-	AUTO_OFF = 12;
-	Status = Parametres_Write(PARAM_AUTO_OFF, (void*) AUTO_OFF);
-	Status = Parametres_Read(PARAM_AUTO_OFF, &AUTO_OFF);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
-
-	AUTO_OFF = 123;
-	Status = Parametres_Write(PARAM_AUTO_OFF, (void*) AUTO_OFF);
-	Status = Parametres_Read(PARAM_AUTO_OFF, &AUTO_OFF);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
-
-	AUTO_OFF = 1234;
-	Status = Parametres_Write(PARAM_AUTO_OFF, (void*) AUTO_OFF);
-	Status = Parametres_Read(PARAM_AUTO_OFF, &AUTO_OFF);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
-
-	AUTO_OFF = 987;
-	Status = Parametres_Write(PARAM_AUTO_OFF, (void*) AUTO_OFF);
-	Status = Parametres_Read(PARAM_AUTO_OFF, &AUTO_OFF);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
+		{KeyType_SectionName,	"ARROSAGE",		"",							(void*) (0),				(void*) (0),		(void*) (0)					},
+		{KeyType_Str,			"ARROSAGE",		"Heure",					(void*) "20:00",			(void*) (0),		(void*) (1000000)			},
+		{KeyType_Int,			"ARROSAGE",		"Intervalle_h",				(void*) (0),				(void*) (0),		(void*) (240)				},
+		{KeyType_Int,			"ARROSAGE",		"VolumeParPlant_ml",		(void*) (0),				(void*) (0),		(void*) (1000000)			},
+		{KeyType_Int,			"ARROSAGE",		"NbPlants",					(void*) (0),				(void*) (0),		(void*) (100)				},
+		{KeyType_Int,			"ARROSAGE",		"DebitPompe_ml_par_h",		(void*) (12300),			(void*) (100),		(void*) (1000000)			},
+		{KeyType_Int,			"ARROSAGE",		"VolumeReservoir_ml",		(void*) (4000),				(void*) (100),		(void*) (1000000)			},
+		{KeyType_Int,			"ARROSAGE",		"VolumeRestant_ml",			(void*) (0),				(void*) (0),		(void*) (1000000)			},
+		{KeyType_Int,			"ARROSAGE",		"TS_Precedente",			(void*) (0),				(void*) (0),		(void*) (4200000000)		}, //TODO : "TS_Precedent"
+		{KeyType_Int,			"ARROSAGE",		"TS_Suivant",				(void*) (0),				(void*) (0),		(void*) (4200000000)		},
 
 
-	//---------------------------------------
-	strcpy(TEST_STR, "abcdefghi");
-	Status = Parametres_Write(PARAM_BOARD_SN, (void*) TEST_STR);
-	Status = Parametres_Read(PARAM_BOARD_SN, &TEST_STR);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
+};
 
-	strcpy(TEST_STR, "");
-	Status = Parametres_Write(PARAM_BOARD_SN, (void*) TEST_STR);
-	Status = Parametres_Read(PARAM_BOARD_SN, &TEST_STR);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
-
-	strcpy(TEST_STR, "012345678901234567890123456789012345678901234567890123456789");
-	Status = Parametres_Write(PARAM_BOARD_SN, (void*) TEST_STR);
-	Status = Parametres_Read(PARAM_BOARD_SN, &TEST_STR);
-	MemoireFAT_PrintFile(Param_IniFile.FileName);
+static char ParamCurrentValue[NB_PARAM][INIFILE_DATA_STR_MAX_SIZE] = {{0},{0}};
 
 
-	while (1)
+const IniFile_s Conf_IniFile = {
+		.FileName		= "PARAM.ini",
+		.KeyTable		= ParamDefaultValue,
+		.NbKey			= NB_PARAM,
+		.CurrentValue	= ParamCurrentValue,
+};
+
+
+static Conf_t This;
+
+
+/*--------------------------------------------------------------------------------------------------
+	FUNCTIONS DEFINITIONS
+--------------------------------------------------------------------------------------------------*/
+
+
+/*------------------------------------------------------------------------------------------------*/
+void Conf_Init(void)
+{
+	if (Parametres_Init(&Conf_IniFile) != Status_OK)
 	{
+		_printf("Conf forced to default value\n");
 	}
+	Parametres_OpenReadFile(&Conf_IniFile);
+
+	Parametres_Read(&Conf_IniFile,	Conf_GEN_StartTempo_s			,	&This.StartTempo_s				);
+	Parametres_Read(&Conf_IniFile,	Conf_LOG_Periode_s				,	&This.LOG_Periode_s				);
+	Parametres_Read(&Conf_IniFile,	Conf_LOG_PeriodePendantAction_s	,	&This.LOG_PeriodePendantAction_s	);
+
+	Parametres_CloseFile(&Conf_IniFile);
+
+
+	//------------------------------------------------------
+	// Affichage de la configuration
+	//------------------------------------------------------
+	_printf("--- CONF  ---\n");
+	_printf("StartTempo_s               = %d\n",	This.StartTempo_s				);
+	_printf("LOG_Periode_s              = %d\n",	This.LOG_Periode_s				);
+	_printf("LOG_PeriodePendantAction_s = %d\n",	This.LOG_PeriodePendantAction_s	);
 }
-#endif
 
-#include "ff.h"
-#include "util_printf.h"
-#include "fct_MemoireFAT.h"
 
-/**
- ***************************************************************************************************
-* Validation OK - JD le 08/09/2014
- */
-Status_e
-Parametres_Init(
-	void
-)
+/*------------------------------------------------------------------------------------------------*/
+void Conf_Write(uint32_t NumParam, void* Value)
 {
-	//_CONSOLE(LogId, "Init\n");
-
-	// Si erreur d'init du fichier, creation d'un nouveau avec les valeurs par defaut
-	if (IniFile_Init(&Param_IniFile) == IniFile_StatusKO)
-	{
-		if (IniFile_OpenWrite(&Param_IniFile) == IniFile_StatusKO)
-			return Status_KO;
-
-		for (int i=0; i<NB_PARAM; i++)
-		{
-			IniFile_WriteRawData(&Param_IniFile.KeyTable[i], Param_IniFile.KeyTable[i].Value);
-		}
-		IniFile_Close(&Param_IniFile);
-	}
-
-	return Status_OK;
+	Parametres_Write(&Conf_IniFile, NumParam, Value);
 }
 
-/**
- ***************************************************************************************************
- * @todo Validation
- */
-Status_e
-Parametres_OpenReadFile( void )
+
+/*------------------------------------------------------------------------------------------------*/
+Conf_t* Conf_Get(void)
 {
-	Status_e Statut;
-
-	// Ouverture du fichier
-	if (IniFile_OpenRead(&Param_IniFile) == IniFile_StatusOK)
-		Statut = Status_OK;
-	else
-		Statut = Status_KO;
-
-	return(Statut);
-}
-
-/***************************************************************************************************
-* @todo Validation
-*/
-Status_e
-Parametres_CloseFile( void  )
-{
-	// Fermeture du fichier
-	IniFile_Close(&Param_IniFile);
-
-	return(Status_OK);
-}
-
-/**
- ***************************************************************************************************
- * Validation OK - JD le 08/09/2014
- */
-Status_e
-Parametres_Read(Param_Liste_e NumParam, void* pValue)
-{
-	Status_e Status;
-
-	// Verification des parametres d'entree
-	if (NumParam >= NB_PARAM)
-		return Status_KO;
-
-	if (pValue == NULL)
-		return Status_KO;
-
-	// Lecture dans le fichier
-	Status = IniFile_ReadValueFromKey(&Param_IniFile.KeyTable[NumParam], pValue);
-
-	return Status;
-}
-
-/**
- ***************************************************************************************************
- * Validation OK - JD le 08/09/2014
- */
-Status_e
-Parametres_Write(Param_Liste_e NumParam, void* Value)
-{
-	Status_e Statut;
-	uint32_t Time = TSW_GetTimestamp_ms();
-
-	// Verification des parametres d'entree
-	if (NumParam >= NB_PARAM)
-		return Status_KO;
-
-	// Ouverture du fichier en ecriture
-	if (IniFile_OpenWrite(&Param_IniFile) == IniFile_StatusKO)
-		return Status_KO;
-
-	// Lecture de l'ensemble de donnees
-	for (int i=0; i<NB_PARAM; i++)
-	{
-		if (IniFile_ReadValueFromKey(&Param_IniFile.KeyTable[i], (void*) &ParamCurrentValue[i][0]) == Status_KO)
-			Statut = Status_KO;
-	}
-
-	// Mise a jour des donnees lues avec la donnee passee en parametre
-	Parametres_EcrireDonnee (NumParam, Value );
-
-	// Ecriture des donnees dans le ficher
-	Parametres_EcrireFichier();
-
-	// Fermeture du fichier
-	IniFile_Close(&Param_IniFile);
-
-	// Affichage des parametres
-	Systeme_PrintParam();
-
-	//_CONSOLE( LogId, "Parametres Sauvegardes en %dms\n", TSW_GetTimestamp_ms() - Time );
-
-	return Statut;
+	return &This;
 }
 
 
-/**
- ***************************************************************************************************
- * @todo Validation
- */
-Status_e
-Parametres_EcrireDonnee(
-		uint8_t NumData,	/**<[in] Numero de la donnee.*/
-		void* value					/**<[in] Valeur a ecrire (valeur de l'entier ou pointeur vers la chaine).*/
-)
-{
-	Status_e Status = Status_OK;
-
-	// Verification des parametres d'entree
-	if (NumData >= NB_PARAM)
-		return Status_KO;
-
-	// Ecriture de la donnee
-	switch(Param_IniFile.KeyTable[NumData].KeyType)
-	{
-		case KeyType_Int:
-			*((long*) &ParamCurrentValue[NumData][0]) = (long) value;
-			break;
-
-		case KeyType_Str:
-			strncpy((char*) ParamCurrentValue[NumData], (char*) value, DATA_STR_MAX_SIZE);
-			break;
-
-		//case KeyType_Float:
-		//	ini_putf(pKeyValue[iKey].SectionName, pKeyValue[iKey].KeyName, (float) pKeyValue[iKey].DefaultValue, FileName);
-		//	break;
-
-		case KeyType_SectionName:
-		default:
-			// Nothing
-			break;
-	}
-
-	return Status;
-}
-
-/**
- ***************************************************************************************************
- * @todo Validation
- */
-Status_e
-Parametres_EcrireFichier(
-	void
-)
-{
-	// Ecriture des valeurs courantes
-	for (int i=0; i<NB_PARAM; i++)
-	{
-		switch(Param_IniFile.KeyTable[i].KeyType)
-		{
-			case KeyType_SectionName:
-				IniFile_WriteRawData(&Param_IniFile.KeyTable[i], (char*) Param_IniFile.KeyTable[i].SectionName);
-				break;
-
-			case KeyType_Int:
-				IniFile_WriteRawData(&Param_IniFile.KeyTable[i], (const void *) *((long*) &ParamCurrentValue[i][0]));
-				break;
-
-			case KeyType_Str:
-				IniFile_WriteRawData(&Param_IniFile.KeyTable[i], (char*) &ParamCurrentValue[i][0]);
-				break;
-		}
-	}
-
-	return Status_OK;
-}
- /**
- * @}
- */
-
-/* End Of File ************************************************************************************/
+/*------------------------------------------------------------------------------------------------*/
