@@ -26,9 +26,9 @@
 
 typedef struct
 {
-	uint32_t	SeuilStart_DegC;
-	uint32_t	SeuilStop_DegC;
-	uint32_t	TempoApresCh_s;
+	uint32_t	Cfg_SeuilStart_DegC;
+	uint32_t	Cfg_SeuilStop_DegC;
+	uint32_t	Cfg_TempoApresCh_s;
 
 } Chauffage_t;
 

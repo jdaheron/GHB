@@ -21,6 +21,9 @@
 	PRIVATE DEFINE
 --------------------------------------------------------------------------------------------------*/
 
+#define LogId			"ETH_TELNET"
+
+
 #define usprintf		_sprintf
 #define UARTprintf		_printf
 
@@ -112,7 +115,7 @@ static void conn_err(void *arg, err_t err)
 /*------------------------------------------------------------------------------------------------*/
 static void close_conn(struct tcp_pcb *pcb, struct telnet_state *hs)
 {
-	UARTprintf("Close connection from %d.%d.%d.%d:%d\n",
+	_CONSOLE( LogId, "Close connection from %d.%d.%d.%d:%d\n",
 			(pcb->remote_ip.addr >> 0) & 0xff,
 			(pcb->remote_ip.addr >> 8) & 0xff,
 			(pcb->remote_ip.addr >> 16) & 0xff,
@@ -176,7 +179,7 @@ static err_t telnet_poll(void *arg, struct tcp_pcb *pcb)
 	} else {
 
 		if (hs->flags & TELNET_FLAG_CLOSE_CONNECTION) {
-			UARTprintf("closing connection in poll\n");
+			_CONSOLE( LogId, "closing connection in poll\n");
 			close_conn(pcb, hs);
 			hs->flags &= ~TELNET_FLAG_CLOSE_CONNECTION;
 		}
@@ -203,7 +206,7 @@ static err_t telnet_sent(void *arg, struct tcp_pcb *pcb, u16_t len)
 		send_data(pcb, hs);
 	} else {
 		if (hs->flags & TELNET_FLAG_CLOSE_CONNECTION) {
-			UARTprintf("closing connection\n");
+			_CONSOLE( LogId, "closing connection\n");
 			close_conn(pcb, hs);
 			hs->flags &= ~TELNET_FLAG_CLOSE_CONNECTION;
 		}
@@ -348,7 +351,7 @@ static err_t telnet_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t e
 
 	if (err == ERR_OK && p == NULL)
 	{
-		UARTprintf("remote host closed connection\n");
+		_CONSOLE( LogId, "remote host closed connection\n");
 		close_conn(pcb, hs);
 	}
 
@@ -371,11 +374,11 @@ static err_t telnet_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 	hs = (struct telnet_state *)mem_malloc(sizeof(struct telnet_state));
 
 	if (hs == NULL) {
-		UARTprintf("telnet_accept: Out of memory\n");
+		_CONSOLE( LogId, "telnet_accept: Out of memory\n");
 		return ERR_MEM;
 	}
 
-	UARTprintf("New connection from %d.%d.%d.%d:%d\n",
+	_CONSOLE( LogId, "New connection from %d.%d.%d.%d:%d\n",
 			(pcb->remote_ip.addr >> 0) & 0xff,
 			(pcb->remote_ip.addr >> 8) & 0xff,
 			(pcb->remote_ip.addr >> 16) & 0xff,

@@ -10,7 +10,8 @@
 --------------------------------------------------------------------------------------------------*/
 
 #include "Ethernet.h"
-#include "Conf.h"
+#include "ConfIni.h"
+#include "fct_DatabaseEeprom.h"
 
 #include "stm32f2x7_eth.h"
 #include "stm32f2x7_eth_bsp.h"
@@ -24,6 +25,8 @@
 	PRIVATE DEFINE
 --------------------------------------------------------------------------------------------------*/
 
+#define LogId			"ETH"
+
 
 /*--------------------------------------------------------------------------------------------------
 	PRIVATE TYPEDEF
@@ -31,11 +34,11 @@
 
 typedef struct
 {
-	uint8_t		IP_Adresse[4];
-	uint8_t		IP_Masque[4];
-	uint8_t		IP_Passerelle[4];
-	Bool_e		DHCP_Actif;
-	uint8_t		MAC_Adresse[6];
+	uint8_t		Cfg_IP_Adresse[4];
+	uint8_t		Cfg_IP_Masque[4];
+	uint8_t		Cfg_IP_Passerelle[4];
+	uint8_t		Cfg_MAC_Adresse[6];
+	Bool_e		Cfg_DHCP_Actif;
 
 } Ethernet_t;
 
@@ -44,7 +47,13 @@ typedef struct
 	PRIVATE DATA DECLARATION
 --------------------------------------------------------------------------------------------------*/
 
-static Ethernet_t This;
+static Ethernet_t This = {
+		.Cfg_IP_Adresse		= {192, 168,   1, 200},
+		.Cfg_IP_Masque		= {255, 255, 255,   0},
+		.Cfg_IP_Passerelle	= {192, 168,   1, 254},
+		.Cfg_MAC_Adresse	= {0, 0, 0, 0, 0, 1},
+		.Cfg_DHCP_Actif		= FALSE,
+};
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -55,73 +64,58 @@ static Ethernet_t This;
 /*------------------------------------------------------------------------------------------------*/
 void Ethernet_Init(void)
 {
-	char str_IP_Adresse[INIFILE_DATA_STR_MAX_SIZE];
-	char str_IP_Masque[INIFILE_DATA_STR_MAX_SIZE];
-	char str_IP_Passerelle[INIFILE_DATA_STR_MAX_SIZE];
-	char str_MAC_Adresse[INIFILE_DATA_STR_MAX_SIZE];
+	Ethernet_t TmpThis;
 
 
 	//------------------------------------------------------
-	// Lecture de la configuration
+	// Lecture des donnees flash
 	//------------------------------------------------------
-	if (Parametres_Init(&Conf_IniFile) != Status_OK)
+	DatabaseEeprom_InitData(DatabaseEeprom_Ethernet, NULL, sizeof(Ethernet_t));
+	if (DatabaseEeprom_Read(DatabaseEeprom_Ethernet, &TmpThis) == Status_KO)
 	{
-		_printf("Conf forced to default value\n");
+		DatabaseEeprom_Write(DatabaseEeprom_Ethernet, &This);
+		memcpy(&TmpThis, &This, sizeof(Ethernet_t));
 	}
-	Parametres_OpenReadFile(&Conf_IniFile);
+	else
+	{
+		memcpy(&This, &TmpThis, sizeof(Ethernet_t));
+	}
 
-	Parametres_Read(&Conf_IniFile,	Conf_ETH_IP_Adresse			,	str_IP_Adresse		);
-	Parametres_Read(&Conf_IniFile,	Conf_ETH_IP_Masque			,	str_IP_Masque		);
-	Parametres_Read(&Conf_IniFile,	Conf_ETH_IP_Passerelle		,	str_IP_Passerelle	);
-	Parametres_Read(&Conf_IniFile,	Conf_ETH_MAC_Adresse		,	str_MAC_Adresse		);
-	Parametres_Read(&Conf_IniFile,	Conf_ETH_DHCP_Actif			,	&This.DHCP_Actif	);
+	//------------------------------------------------------
+	// Comparaison avec fichier ini
+	//------------------------------------------------------
+	if (ConfIni_Get()->IsValide == TRUE)
+	{
+		memcpy(This.Cfg_IP_Adresse,		ConfIni_Get()->ETH_IP_Adresse, 4);
+		memcpy(This.Cfg_IP_Masque,		ConfIni_Get()->ETH_IP_Masque, 4);
+		memcpy(This.Cfg_IP_Passerelle,	ConfIni_Get()->ETH_IP_Passerelle, 4);
+		memcpy(This.Cfg_MAC_Adresse,	ConfIni_Get()->ETH_MAC_Adresse, 6);
+		This.Cfg_DHCP_Actif = ConfIni_Get()->ETH_DHCP_Actif;
 
-	Parametres_CloseFile(&Conf_IniFile);
+		if (memcmp(&TmpThis, &This, sizeof(Ethernet_t)) != 0)
+		{
+			DatabaseEeprom_Write(DatabaseEeprom_Ethernet, &This);
+		}
+	}
 
 
 	//------------------------------------------------------
 	// Affichage de la configuration
 	//------------------------------------------------------
-	_printf("--- CONF_ETHERNET ---\n");
-	_printf("IP_Adresse    = %s\n",	str_IP_Adresse		);
-	_printf("IP_Masque     = %s\n",	str_IP_Masque		);
-	_printf("IP_Passerelle = %s\n",	str_IP_Passerelle	);
-	_printf("MAC_Adresse   = %s\n",	str_MAC_Adresse		);
-	_printf("DHCP_Actif    = %d\n",	This.DHCP_Actif		);
+	_CONSOLE( LogId, "--- CONF_ETHERNET ---\n");
+	_CONSOLE( LogId, "IP_Adresse    = %d.%d.%d.%d\n",		This.Cfg_IP_Adresse[0], This.Cfg_IP_Adresse[1], This.Cfg_IP_Adresse[2], This.Cfg_IP_Adresse[3]);
+	_CONSOLE( LogId, "IP_Masque     = %d.%d.%d.%d\n",		This.Cfg_IP_Masque[0], This.Cfg_IP_Masque[1], This.Cfg_IP_Masque[2], This.Cfg_IP_Masque[3]);
+	_CONSOLE( LogId, "IP_Passerelle = %d.%d.%d.%d\n", 		This.Cfg_IP_Passerelle[0], This.Cfg_IP_Passerelle[1], This.Cfg_IP_Passerelle[2], This.Cfg_IP_Passerelle[3]);
+	_CONSOLE( LogId, "MAC_Adresse   = %d:%d:%d:%d:%d:%d\n",	This.Cfg_MAC_Adresse[0], This.Cfg_MAC_Adresse[1], This.Cfg_MAC_Adresse[2], This.Cfg_MAC_Adresse[3], This.Cfg_MAC_Adresse[4], This.Cfg_MAC_Adresse[5]);
+	_CONSOLE( LogId, "DHCP_Actif    = %d\n",					This.Cfg_DHCP_Actif		);
 
-
-	//------------------------------------------------------
-	// Décodage/Interprétation
-	//------------------------------------------------------
-	char* Val[16];
-
-	Conv_ParseString(str_IP_Adresse, '.', Val);
-	for (int i = 0; i < 4; i++)
-	{
-		This.IP_Adresse[i] = strtoul(Val[i], NULL ,10);
-	}
-	Conv_ParseString(str_IP_Masque, '.', Val);
-	for (int i = 0; i < 4; i++)
-	{
-		This.IP_Masque[i] = strtoul(Val[i], NULL ,10);
-	}
-	Conv_ParseString(str_IP_Passerelle, '.', Val);
-	for (int i = 0; i < 4; i++)
-	{
-		This.IP_Passerelle[i] = strtoul(Val[i], NULL ,10);
-	}
-	Conv_ParseString(str_MAC_Adresse, ':', Val);
-	for (int i = 0; i < 6; i++)
-	{
-		This.MAC_Adresse[i] = strtoul(Val[i], NULL ,10);
-	}
 
 	//------------------------------------------------------
 	// Application de la configuration
 	//------------------------------------------------------
 
 	ETH_BSP_Config();	// Configure ethernet (GPIOs, clocks, MAC, DMA)
-	LwIP_Init(This.IP_Adresse, This.IP_Masque, This.IP_Passerelle, This.DHCP_Actif, This.MAC_Adresse);		// Initilaize the LwIP stack
+	LwIP_Init(This.Cfg_IP_Adresse, This.Cfg_IP_Masque, This.Cfg_IP_Passerelle, This.Cfg_DHCP_Actif, This.Cfg_MAC_Adresse);		// Initilaize the LwIP stack
 	tftpd_init();		// TFTP server Init
 	//httpd_init();		// Http webserver Init
 	Telnet_Init(TELNET_PROMPT, TELNET_WELCOM);

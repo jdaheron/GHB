@@ -12,6 +12,10 @@
 /* Includes ***************************************************************************************/
 
 #include "equ_AM23xx.h"
+#include "util_CONSOLE.h"
+
+
+#define LogId			"AM23xx"
 
 
 /* External Variables *****************************************************************************/
@@ -27,16 +31,17 @@ Bool_e AM23xx_Read(int16_t* pTemp, uint16_t* pHumid)
 	Bool_e IsValid = FALSE;
 
 
-	// Wakup
-	I2C1_SendStart();
-	I2C1_SendAddress(AM23xx_I2C_ADDRESS, 0);
-	I2C1_SendByte(0);
-	//Delay_ms(2);
-	I2C1_SendStop();
-	Delay_ms(20);
-
 	for (int NbTry = 0; NbTry < 3; NbTry++)
 	{
+		// Wakup
+		I2C1_SendStart();
+		I2C1_SendAddress(AM23xx_I2C_ADDRESS, 0);
+		I2C1_SendByte(0);
+		//Delay_ms(2);
+		I2C1_SendStop();
+
+		Delay_ms(20);
+
 		I2C1_SendStart();
 		I2C1_SendAddress(AM23xx_I2C_ADDRESS, 0);
 		I2C1_SendByte(0x03);
@@ -69,8 +74,13 @@ Bool_e AM23xx_Read(int16_t* pTemp, uint16_t* pHumid)
 			*pTemp  = (Buff[4] << 8) + Buff[5];
 			*pHumid = (Buff[2] << 8) + Buff[3];
 
+			_CONSOLE(LogId, "Read ok\n");
 			IsValid = TRUE;
 			break;
+		}
+		else
+		{
+			_CONSOLE(LogId, "Read error\n");
 		}
 	}
 

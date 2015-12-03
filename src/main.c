@@ -11,6 +11,7 @@
 
 /* Includes ***************************************************************************************/
 
+#include "ConfIni.h"
 #include "fct_TempHygro.h"
 #include "api_USB.h"
 
@@ -25,7 +26,6 @@
 #include <FILES/fct_MemoireFAT.h>
 #include <FILES/FatFs/drivers/drv_SdCard_SPI.h>
 
-#include "Conf.h"
 #include "Arrosage.h"
 #include "Chauffage.h"
 #include "Ethernet.h"
@@ -78,7 +78,10 @@ typedef enum
  * @defgroup Private_Defines Private Defines
  * @{
  */
- 
+
+#define LogId			"MAIN"
+
+#define REBOOT_ON_DEFAULT_MODE	FALSE
 #define MAIN_CONSOLE_ENABLE		1
 #define USE_ETHERNET_AND_USB	1
 
@@ -98,6 +101,9 @@ typedef enum
 #else
 	#define _MAIN_CONSOLE	((void*) 0)
 #endif
+
+#define USE_TEMP_HYGRO	1
+
 
 
  /** 
@@ -148,7 +154,7 @@ void LifeBit_Main()
 		{
 			TSW_Start(&Tmr_LifeBit, 10);
 			Etat = Etat_ACTIF;
-			//_printf("lb\n");
+			//_CONSOLE( LogId, "lb\n");
 		}
 		else
 		{
@@ -191,18 +197,18 @@ void LogData()
 		);
 	}
 
-	_printf("LOG:%s\n", LogBuffer);
+	_CONSOLE( LogId, "LOG:%s\n", LogBuffer);
 	LogFile_Write("", 0, LogBuffer);
 
 	if ((Mode == MODE_CHAUFFAGE)
 	||	(Mode == MODE_VENTILLATION)
 	||	(Arrosage_Get()->Etat == Etat_INACTIF))
 	{
-		TSW_Start(&Tmr_LOG, 1000 * Conf_Get()->LOG_PeriodePendantAction_s);
+		TSW_Start(&Tmr_LOG, 1000 * ConfIni_Get()->GEN_LogPeriodePendantAction_s);
 	}
 	else
 	{
-		TSW_Start(&Tmr_LOG, 1000 * Conf_Get()->LOG_Periode_s);
+		TSW_Start(&Tmr_LOG, 1000 * ConfIni_Get()->GEN_LogPeriode_s);
 	}
 }
 
@@ -473,18 +479,22 @@ int main(void)
 	I2C1_Init(100 * 1000);						// 100kHz
 	ADC1_Init();
 
-	_printf("\n--- START - ALJ");
-	_printf(VERSION_SW);
-	_printf(" ---\n");
+	_CONSOLE( LogId, "\n--- START - ALJ");
+	_CONSOLE( LogId, VERSION_SW);
+	_CONSOLE( LogId, " ---\n");
 
 	REGLAGE_RTC();
 
 	//----------------------------------
 	// FONCTIONNALITES
 	MemoireFAT_Init((Diskio_drvTypeDef*) &SdCard_SPI_Driver);
-	TempHygro_Init(TEMPERATURE_PERIODE_ACQUISITION_ms);
+	#if USE_TEMP_HYGRO
+		TempHygro_Init(TEMPERATURE_PERIODE_ACQUISITION_ms);
+	#endif
+	Delay_ms(50);
+
 //	Hygrometre_Init();
-	Conf_Init();
+	ConfIni_Init();
 	Arrosage_Init();
 	Chauffage_Init();
 	Ventilation_Init();
@@ -494,14 +504,14 @@ int main(void)
 	Terminal_Init();
 	Terminal_Cmd_Init();
 
-	//_printf("MODE_FCT_SERVEUR\n");
+	//_CONSOLE( LogId, "MODE_FCT_SERVEUR\n");
 	ModeFct = MODE_FCT_SERVEUR;
 	//MemoireFAT_PrintFileList("httpserver");
 	Ethernet_Init();
 
 	if (RTC_BkpRegister_Read(0) != 0)
 	{
-		_printf("MODE_FCT_USB\n");
+		_CONSOLE( LogId, "MODE_FCT_USB\n");
 		ModeFct = MODE_FCT_USB;
 		//USB_Init((Diskio_drvTypeDef*) &SdCard_SPI_Driver);
 		RTC_BkpRegister_Write(0, 0);
@@ -515,7 +525,7 @@ int main(void)
 
 	WDG_InitWWDG(2000);
 
-	_printf("--- StartupTime=%dms ---\n\n", TSW_GetTimestamp_ms());
+	_CONSOLE( LogId, "--- StartupTime=%dms ---\n\n", TSW_GetTimestamp_ms());
 	while(1)
 	{
 		WDG_Refresh();
@@ -544,7 +554,9 @@ int main(void)
 		LifeBit_Main();
 		RTC_Main();
 		MemoireFAT_Main();
-		TempHygro_Thread();
+		#if USE_TEMP_HYGRO
+			TempHygro_Thread();
+		#endif
 
 		if (Mode != MODE_DEMARRAGE)
 		{
@@ -561,7 +573,8 @@ int main(void)
 
 		//----------------------------------
 		// LECTURE TEMPERATURE
-		if (TempHygro_IsValide() == FALSE)
+		if ((TempHygro_IsValide() == FALSE)
+		&&	(Mode != MODE_DEMARRAGE))
 		{
 			Mode = MODE_DEFAUT;
 		}
@@ -578,7 +591,7 @@ int main(void)
 			RTC_Lire(&Time);
 			TSW_ReStart(&Tmr_RTC);
 
-			//_printf("RTC = %d-%02d-%02d %02d:%02d:%02d;%08d;",
+			//_CONSOLE( LogId, "RTC = %d-%02d-%02d %02d:%02d:%02d;%08d;",
 			//				Time.Annee, Time.Mois, Time.Jour,
 			//				Time.Heure, Time.Minute, Time.Seconde,
 			//				TSW_GetTimestamp_ms());
@@ -589,12 +602,12 @@ int main(void)
 		// AFFICHAGE TEMPERATURE
 /*		if (TSW_IsRunning(&TmrAffichTempHygro) == FALSE)
 		{
-			_printf("TempHygro = ");
+			_CONSOLE( LogId, "TempHygro = ");
 			if (TempHygro_IsValide() == FALSE)
-				_printf("Non valide\n");
+				_CONSOLE( LogId, "Non valide\n");
 			else
 			{
-				_printf("%.01f %c\t%.01f %c\n",
+				_CONSOLE( LogId, "%.01f %c\t%.01f %c\n",
 						Temperature, '°',
 						Hygrometrie, '%');
 			}
@@ -629,6 +642,11 @@ int main(void)
 			//--------------------------------------------------------------
 			case MODE_DEMARRAGE :
 
+				if (NouveauMode)
+				{
+					_CONSOLE( LogId, "----- MODE_DEMARRAGE -----\n");
+				}
+
 				if (Mode_Demarrage() == Status_Fini)
 				{
 					Mode = MODE_SURVEILLANCE;
@@ -642,7 +660,7 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_printf("----- MODE_SURVEILLANCE -----\n");
+					_CONSOLE( LogId, "----- MODE_SURVEILLANCE -----\n");
 
 					EtatVentillation = Etat_INACTIF;
 					EtatChauffage = Etat_INACTIF;
@@ -652,13 +670,13 @@ int main(void)
 				&&	(TSW_IsRunning(&Tmr_CH) == FALSE))
 				{
 					// Pas de chauffage dessuite après l'extraction
-					if (Temperature < Chauffage_Get()->SeuilStart_DegC)
+					if (Temperature < Chauffage_Get()->Cfg_SeuilStart_DegC)
 					{
 						Mode = MODE_CHAUFFAGE;
 					}
 
 					// Pas d'extraction dessuite après le chauffage
-					if (Temperature >= Ventilation_Get()->SeuilStart_DegC)
+					if (Temperature >= Ventilation_Get()->Cfg_SeuilStart_DegC)
 					{
 						Mode = MODE_VENTILLATION;
 					}
@@ -672,9 +690,9 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_printf("----- MODE_CHAUFFAGE -----\n");
+					_CONSOLE( LogId, "----- MODE_CHAUFFAGE -----\n");
 
-					if (Ventilation_Get()->ActiverPendantChauffage)
+					if (Ventilation_Get()->Cfg_ActiverPendantChauffage)
 						EtatVentillation = Etat_ACTIF;
 					else
 						EtatVentillation = Etat_INACTIF;
@@ -682,11 +700,11 @@ int main(void)
 				}
 
 				// Attente franchissement seuil
-				if (Temperature >= Chauffage_Get()->SeuilStop_DegC)
+				if (Temperature >= Chauffage_Get()->Cfg_SeuilStop_DegC)
 				{
 					EtatChauffage = Etat_INACTIF;
 
-					TSW_Start(&Tmr_CH, 1000 * Chauffage_Get()->TempoApresCh_s);
+					TSW_Start(&Tmr_CH, 1000 * Chauffage_Get()->Cfg_TempoApresCh_s);
 					Mode = MODE_SURVEILLANCE;
 				}
 
@@ -697,17 +715,17 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_printf("----- MODE_VENTILLATION -----\n");
+					_CONSOLE( LogId, "----- MODE_VENTILLATION -----\n");
 
 					EtatChauffage = Etat_INACTIF;
 					EtatVentillation = Etat_ACTIF;
 				}
 
-				if (Temperature < Ventilation_Get()->SeuilStop_DegC)
+				if (Temperature < Ventilation_Get()->Cfg_SeuilStop_DegC)
 				{
 					EtatVentillation = Etat_INACTIF;
 
-					TSW_Start(&Tmr_EXT, 1000 * Ventilation_Get()->TempoApresEXT_s);
+					TSW_Start(&Tmr_EXT, 1000 * Ventilation_Get()->Cfg_TempoApresEXT_s);
 					Mode = MODE_SURVEILLANCE;
 				}
 
@@ -718,7 +736,7 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_printf("----- MODE_DEFAUT -----\n");
+					_CONSOLE( LogId, "----- MODE_DEFAUT -----\n");
 
 					EtatVentillation 	= Etat_INACTIF;
 					EtatChauffage		= Etat_INACTIF;
@@ -726,10 +744,13 @@ int main(void)
 				}
 				else
 				{
-					_printf("REBOOT...\n");
-					TSW_Delay(5000);
-					GOTO(0);
-					Mode = MODE_DEMARRAGE;
+					if (REBOOT_ON_DEFAULT_MODE == TRUE)
+					{
+						_CONSOLE( LogId, "REBOOT...\n");
+						TSW_Delay(5000);
+						GOTO(0);
+						Mode = MODE_DEMARRAGE;
+					}
 				}
 				break;
 
@@ -739,13 +760,13 @@ int main(void)
 		// MAJ DES SORTIES
 		if (GPIO_Get(PORT_RELAIS_V_EXT) != EtatVentillation)
 		{
-			_printf("Ventillation = %d\n", EtatVentillation);
+			_CONSOLE( LogId, "Ventillation = %d\n", EtatVentillation);
 			GPIO_Set(PORT_RELAIS_V_EXT, EtatVentillation);
 			//LogData();
 		}
 		if (GPIO_Get(PORT_RELAIS_CH) != EtatChauffage)
 		{
-			_printf("Chauffage = %d\n", EtatChauffage);
+			_CONSOLE( LogId, "Chauffage = %d\n", EtatChauffage);
 			GPIO_Set(PORT_RELAIS_CH, EtatChauffage);
 			//LogData();
 		}

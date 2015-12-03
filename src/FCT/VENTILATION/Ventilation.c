@@ -10,12 +10,15 @@
 --------------------------------------------------------------------------------------------------*/
 
 #include "Ventilation.h"
-#include "Conf.h"
+#include "ConfIni.h"
+#include "fct_DatabaseEeprom.h"
 
 
 /*--------------------------------------------------------------------------------------------------
 	PRIVATE DEFINE
 --------------------------------------------------------------------------------------------------*/
+
+#define LogId			"VENTILATION"
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -38,31 +41,44 @@ static Ventilation_t This;
 /*------------------------------------------------------------------------------------------------*/
 void Ventilation_Init(void)
 {
-	//------------------------------------------------------
-	// Lecture de la configuration
-	//------------------------------------------------------
-	if (Parametres_Init(&Conf_IniFile) != Status_OK)
+	Ventilation_t TmpThis;
+	Bool_e ConfValide = TRUE;
+
+
+	//----------------------------------------------------------
+	// Initialisation des donnees
+	DatabaseEeprom_InitData(DatabaseEeprom_Ventilation, NULL, sizeof(Ventilation_t));
+	if (DatabaseEeprom_Read(DatabaseEeprom_Ventilation, &TmpThis) == Status_KO)
 	{
-		_printf("Conf forced to default value\n");
+		ConfValide = FALSE;
 	}
-	Parametres_OpenReadFile(&Conf_IniFile);
 
-	Parametres_Read(&Conf_IniFile,	Conf_EXT_SeuilStart_DegC	,	&This.SeuilStop_DegC			);
-	Parametres_Read(&Conf_IniFile,	Conf_EXT_SeuilStop_DegC		,	&This.SeuilStart_DegC			);
-	Parametres_Read(&Conf_IniFile,	Conf_EXT_TempoApresEXT_s	,	&This.TempoApresEXT_s			);
-	Parametres_Read(&Conf_IniFile,	Conf_EXT_ActiverPendantCh	,	&This.ActiverPendantChauffage	);
 
-	Parametres_CloseFile(&Conf_IniFile);
+	//------------------------------------------------------
+	// Comparaison avec fichier ini
+	//------------------------------------------------------
+	if (ConfIni_Get()->IsValide == TRUE)
+	{
+		This.Cfg_SeuilStop_DegC				= ConfIni_Get()->EXT_SeuilStart_DegC;
+		This.Cfg_SeuilStart_DegC			= ConfIni_Get()->EXT_SeuilStart_DegC;
+		This.Cfg_TempoApresEXT_s			= ConfIni_Get()->EXT_TempoApresEXT_s;
+		This.Cfg_ActiverPendantChauffage	= ConfIni_Get()->EXT_ActiverPendantCh;
+
+		if (memcmp(&TmpThis, &This, sizeof(Ventilation_t)) != 0)
+		{
+			DatabaseEeprom_Write(DatabaseEeprom_Ventilation, &This);
+		}
+	}
 
 
 	//------------------------------------------------------
 	// Affichage de la configuration
 	//------------------------------------------------------
-	_printf("--- CONF VENTILATION ---\n");
-	_printf("SeuilStop_DegC    = %d\n",	This.SeuilStop_DegC				);
-	_printf("SeuilStart_DegC   = %d\n",	This.SeuilStart_DegC			);
-	_printf("TempoApresEXT_s   = %d\n",	This.TempoApresEXT_s			);
-	_printf("ActiverPendantCh. = %d\n",	This.ActiverPendantChauffage	);
+	_CONSOLE( LogId, "--- CONF VENTILATION ---\n");
+	_CONSOLE( LogId, "SeuilStop_DegC    = %d\n",	This.Cfg_SeuilStop_DegC				);
+	_CONSOLE( LogId, "SeuilStart_DegC   = %d\n",	This.Cfg_SeuilStart_DegC			);
+	_CONSOLE( LogId, "TempoApresEXT_s   = %d\n",	This.Cfg_TempoApresEXT_s			);
+	_CONSOLE( LogId, "ActiverPendantCh. = %d\n",	This.Cfg_ActiverPendantChauffage	);
 }
 
 

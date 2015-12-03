@@ -34,6 +34,10 @@
 	FUNCTIONS DEFINITIONS
 --------------------------------------------------------------------------------------------------*/
 
+Status_e Parametres_EcrireDonnee(IniFile_s* IniFile, uint8_t NumData, void* value);
+Status_e Parametres_EcrireFichier(IniFile_s* IniFile);
+
+
 
 /*------------------------------------------------------------------------------------------------*/
 Status_e Parametres_Init(IniFile_s* IniFile)

@@ -193,6 +193,8 @@ MemoireFAT_Init(
 	FIL File;
 	FRESULT FRes;
 	uint16_t block_size;
+	static Bool_e IsFirstTry = TRUE;
+
 
 	if (DiskDriver == NULL)
 		return FALSE;
@@ -251,11 +253,16 @@ MemoireFAT_Init(
 
 		_MEMOIRE_CONSOLE("[Memoire] FS OK\n");
 		Memoire.InitOk = TRUE;
+		IsFirstTry = FALSE;
 	}
 	else
 	{
-		_MEMOIRE_CONSOLE("[Memoire] FS ERROR\n");
+		if (IsFirstTry == TRUE)
+		{
+			_MEMOIRE_CONSOLE("[Memoire] FS ERROR\n");
+		}
 		MemoireFAT_DeInit();
+		IsFirstTry = FALSE;
 	}
 
 	return Memoire.InitOk;

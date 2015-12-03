@@ -1,6 +1,6 @@
 /**************************************************************************************************/
 /*																								  */
-/* Conf																							  */
+/* Conf Ini																						  */
 /*																								  */
 /**************************************************************************************************/
 
@@ -9,7 +9,7 @@
 	INCLUDES
 --------------------------------------------------------------------------------------------------*/
 
-#include "Conf.h"
+#include "ConfIni.h"
 #include "util_printf.h"
 #include "drv_CAT24AA16.h"
 
@@ -18,10 +18,55 @@
 	PRIVATE DEFINE
 --------------------------------------------------------------------------------------------------*/
 
+#define LogId			"CONF_INI"
+
 
 /*--------------------------------------------------------------------------------------------------
 	PRIVATE TYPEDEF
 --------------------------------------------------------------------------------------------------*/
+
+
+typedef enum
+{
+	SECTION_GENERAL					 = 0,
+	ConfIni_GEN_StartTempo_s			,
+
+	SECTION_ETHERNET					,
+	ConfIni_ETH_IP_Adresse				,
+	ConfIni_ETH_IP_Masque				,
+	ConfIni_ETH_IP_Passerelle			,
+	ConfIni_ETH_MAC_Adresse				,
+	ConfIni_ETH_DHCP_Actif				,
+
+	SECTION_CHAUFFAGE					,
+	ConfIni_CH_SeuilStart_DegC			,
+	ConfIni_CH_SeuilStop_DegC			,
+	ConfIni_CH_TempoApresCh_s			,
+
+	SECTION_EXTRACT						,
+	ConfIni_EXT_SeuilStart_DegC			,
+	ConfIni_EXT_SeuilStop_DegC			,
+	ConfIni_EXT_TempoApresEXT_s			,
+	ConfIni_EXT_ActiverPendantCh		,
+
+	SECTION_LOG							,
+	ConfIni_LOG_Periode_s				,
+	ConfIni_LOG_PeriodePendantAction_s	,
+
+	SECTION_ARROSAGE					,
+	ConfIni_ARR_Heure					,
+	ConfIni_ARR_Intervalle_h			,
+	ConfIni_ARR_VolumeParPlant_ml		,
+	ConfIni_ARR_NbPlants				,
+	ConfIni_ARR_DebitPompe_ml_par_h		,
+	ConfIni_ARR_VolumeReservoir_ml		,
+	ConfIni_ARR_VolumeRestant_ml		,
+	ConfIni_ARR_TS_Precedent			,
+	ConfIni_ARR_TS_Suivant				,
+
+	NB_PARAM,
+
+} ConfIni_e;
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -82,7 +127,7 @@ const IniFile_s Conf_IniFile = {
 };
 
 
-static Conf_t This;
+static ConfIni_t This;
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -91,40 +136,87 @@ static Conf_t This;
 
 
 /*------------------------------------------------------------------------------------------------*/
-void Conf_Init(void)
+void ConfIni_Init(void)
 {
+	char str_IP_Adresse[INIFILE_DATA_STR_MAX_SIZE];
+	char str_IP_Masque[INIFILE_DATA_STR_MAX_SIZE];
+	char str_IP_Passerelle[INIFILE_DATA_STR_MAX_SIZE];
+	char str_MAC_Adresse[INIFILE_DATA_STR_MAX_SIZE];
+	This.IsValide = TRUE;
+
+
+	if (MemoireFAT_IsReady() == FALSE)
+	{
+		This.IsValide = FALSE;
+	}
+
+	//------------------------------------------------------
+	// Lecture de la configuration
+	//------------------------------------------------------
 	if (Parametres_Init(&Conf_IniFile) != Status_OK)
 	{
-		_printf("Conf forced to default value\n");
+		_CONSOLE( LogId, "Conf forced to default value\n");
 	}
 	Parametres_OpenReadFile(&Conf_IniFile);
 
-	Parametres_Read(&Conf_IniFile,	Conf_GEN_StartTempo_s			,	&This.StartTempo_s				);
-	Parametres_Read(&Conf_IniFile,	Conf_LOG_Periode_s				,	&This.LOG_Periode_s				);
-	Parametres_Read(&Conf_IniFile,	Conf_LOG_PeriodePendantAction_s	,	&This.LOG_PeriodePendantAction_s	);
+	Parametres_Read(&Conf_IniFile,	ConfIni_GEN_StartTempo_s			,	&This.GEN_StartTempo_s				);
+	Parametres_Read(&Conf_IniFile,	ConfIni_LOG_Periode_s				,	&This.GEN_LogPeriode_s				);
+	Parametres_Read(&Conf_IniFile,	ConfIni_LOG_PeriodePendantAction_s	,	&This.GEN_LogPeriodePendantAction_s	);
+
+	Parametres_Read(&Conf_IniFile,	ConfIni_ETH_IP_Adresse				,	str_IP_Adresse						);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ETH_IP_Masque				,	str_IP_Masque						);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ETH_IP_Passerelle			,	str_IP_Passerelle					);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ETH_MAC_Adresse				,	str_MAC_Adresse						);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ETH_DHCP_Actif				,	&This.ETH_DHCP_Actif				);
+
+	Parametres_Read(&Conf_IniFile,	ConfIni_CH_SeuilStart_DegC			,	&This.CH_SeuilStart_DegC			);
+	Parametres_Read(&Conf_IniFile,	ConfIni_CH_SeuilStop_DegC			,	&This.CH_SeuilStop_DegC				);
+	Parametres_Read(&Conf_IniFile,	ConfIni_CH_TempoApresCh_s			,	&This.CH_TempoApresCh_s				);
+
+	Parametres_Read(&Conf_IniFile,	ConfIni_EXT_SeuilStart_DegC			,	&This.EXT_SeuilStart_DegC			);
+	Parametres_Read(&Conf_IniFile,	ConfIni_EXT_SeuilStop_DegC			,	&This.EXT_SeuilStop_DegC			);
+	Parametres_Read(&Conf_IniFile,	ConfIni_EXT_TempoApresEXT_s			,	&This.EXT_TempoApresEXT_s			);
+	Parametres_Read(&Conf_IniFile,	ConfIni_EXT_ActiverPendantCh		,	&This.EXT_ActiverPendantCh			);
+
+	Parametres_Read(&Conf_IniFile,	ConfIni_ARR_Heure					,	This.ARR_Heure						);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ARR_Intervalle_h			,	&This.ARR_Intervalle_h				);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ARR_VolumeParPlant_ml		,	&This.ARR_VolumeParPlant_ml			);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ARR_NbPlants				,	&This.ARR_NbPlants					);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ARR_DebitPompe_ml_par_h		,	&This.ARR_DebitPompe_ml_par_h		);
+	Parametres_Read(&Conf_IniFile,	ConfIni_ARR_VolumeReservoir_ml		,	&This.ARR_VolumeReservoir_ml		);
 
 	Parametres_CloseFile(&Conf_IniFile);
 
+	//------------------------------------------------------
+	// Décodage/Interprétation
+	//------------------------------------------------------
+	char* Val[16];
 
-	//------------------------------------------------------
-	// Affichage de la configuration
-	//------------------------------------------------------
-	_printf("--- CONF  ---\n");
-	_printf("StartTempo_s               = %d\n",	This.StartTempo_s				);
-	_printf("LOG_Periode_s              = %d\n",	This.LOG_Periode_s				);
-	_printf("LOG_PeriodePendantAction_s = %d\n",	This.LOG_PeriodePendantAction_s	);
+	Conv_ParseString(str_IP_Adresse, '.', Val);
+	for (int i = 0; i < 4; i++)
+	{
+		This.ETH_IP_Adresse[i] = strtoul(Val[i], NULL ,10);
+	}
+	Conv_ParseString(str_IP_Masque, '.', Val);
+	for (int i = 0; i < 4; i++)
+	{
+		This.ETH_IP_Masque[i] = strtoul(Val[i], NULL ,10);
+	}
+	Conv_ParseString(str_IP_Passerelle, '.', Val);
+	for (int i = 0; i < 4; i++)
+	{
+		This.ETH_IP_Passerelle[i] = strtoul(Val[i], NULL ,10);
+	}
+	Conv_ParseString(str_MAC_Adresse, ':', Val);
+	for (int i = 0; i < 6; i++)
+	{
+		This.ETH_MAC_Adresse[i] = strtoul(Val[i], NULL ,10);
+	}
 }
 
 
 /*------------------------------------------------------------------------------------------------*/
-void Conf_Write(uint32_t NumParam, void* Value)
-{
-	Parametres_Write(&Conf_IniFile, NumParam, Value);
-}
-
-
-/*------------------------------------------------------------------------------------------------*/
-Conf_t* Conf_Get(void)
+ConfIni_t* ConfIni_Get(void)
 {
 	return &This;
 }

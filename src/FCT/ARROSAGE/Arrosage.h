@@ -27,12 +27,13 @@
 
 typedef struct
 {
-	char			Heure[8];
-	uint32_t		Intervalle_h;
-	uint32_t		VolumeParPlant_ml;
-	uint32_t		NbPlants;
-	uint32_t		DebitPompe_ml_par_h;
-	uint32_t		VolumeReservoir_ml;
+	char			Cfg_Heure[8];
+	uint32_t		Cfg_Intervalle_h;
+	uint32_t		Cfg_VolumeParPlant_ml;
+	uint32_t		Cfg_NbPlants;
+	uint32_t		Cfg_DebitPompe_ml_par_h;
+	uint32_t		Cfg_VolumeReservoir_ml;
+
 	uint32_t		VolumeRestant_ml;
 	uint32_t		TS_Precedent;
 	uint32_t		TS_Suivant;

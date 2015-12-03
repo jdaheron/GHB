@@ -14,7 +14,6 @@
 #include <FILES/FatFs/ff.h>
 #include "util_TSW.h"
 #include "util_printf.h"
-#include "Conf.h"
 #include "Arrosage.h"
 
 
@@ -86,7 +85,6 @@ void Cmd_Test(char* bufferIn, pSendResponse_f Terminal_Write)
 	uint32_t TS;
 
 	TS = RTC_GetTimestamp();
-	Conf_Write(Conf_ARR_TS_Precedent, (void*) TS);
 }
 
 

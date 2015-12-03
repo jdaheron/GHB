@@ -23,10 +23,15 @@
 #include "ETH/stm32f2x7_eth_bsp.h"
 #include "stm32f2x7_eth.h"
 #include "stm32f2xx_hal_conf.h"
+#include "util_CONSOLE.h"
 
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
+
+#define LogId			"ETH_BSP"
+
+
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 //__IO uint32_t  EthInitStatus = 0;
@@ -125,18 +130,18 @@ void ETH_BSP_Config(void)
 
 	if (PhyAddr > 32)
 	{
-		_printf("Ethernet Phy Not Found\n\r");
+		_CONSOLE( LogId, "Ethernet Phy Not Found\n\r");
 		return;// 1;
 	}
 
 	/* Configure Ethernet */
 	if (ETH_Init(&ETH_InitStructure, PhyAddr) == 0)
 	{
-		_printf("Ethernet Initialization Failed\n\r");
+		_CONSOLE( LogId, "Ethernet Initialization Failed\n\r");
 		return;// 1;
 	}
 
-	_printf("Check LAN LEDs\n\r");
+	_CONSOLE( LogId, "Check LAN LEDs\n\r");
   
 #endif
 }

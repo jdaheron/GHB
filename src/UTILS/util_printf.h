@@ -10,11 +10,10 @@
 
 
 #include "BSP.h"
+#include <stdarg.h>
 
 
-//int32_t _printf(const uint8_t *format, ...);
-//int32_t _sprintf(uint8_t *out, const uint8_t *format, ...);
-
+int print(char **out, const char *format, va_list args );
 int _printf(const char *format, ...);
 int _no_printf(const char *format, ...);
 int _sprintf(char *out, const char *format, ...);

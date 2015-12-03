@@ -634,7 +634,7 @@ static const MappingGpio_s MappingGpio[] = {
 #include "AExxxxx/drv_WDG.h"
 
 // Peripheriques externes
-//#include "drv_SdCard_SPI.h"
+#include "drv_CAT24AA16.h"
 
 
 /* Exported macro ------------------------------------------------------------*/

@@ -13,16 +13,26 @@
 
 #include "fct_TempHygro.h"
 #include "equ_AM23xx.h"
+#include "util_CONSOLE.h"
 
 
 
+#define LogId		"TempHygro"
 #define TEMPHYGRO_TEMP_DEFAULT_VALUE	22
 #define TEMPHYGRO_HYGRO_DEFAULT_VALUE	50
 
 
+void 	TempHygro_Read(void);
+
+
 /* External Variables *****************************************************************************/
 
-static TempHygro_s TempHygro;
+static TempHygro_s TempHygro = {
+		.IsValide				= TRUE,
+		.NbReadError			= 0,
+		.CurrentTemp_DegC		= TEMPHYGRO_TEMP_DEFAULT_VALUE,
+		.CurrentHygro_pr100		= TEMPHYGRO_HYGRO_DEFAULT_VALUE,
+};
 
  
 
@@ -63,8 +73,10 @@ void TempHygro_Read(void)
 		TempHygro.NbReadError++;
 		if (TempHygro.NbReadError >= TEMPHYGRO_NB_READ_ERROR_MAX)
 		{
+			TempHygro.NbReadError = TEMPHYGRO_NB_READ_ERROR_MAX;
 			TempHygro.IsValide = FALSE;
 		}
+		_CONSOLE(LogId, "Read ERROR = %d\n", TempHygro.NbReadError);
 	}
 	// Read OK
 	else

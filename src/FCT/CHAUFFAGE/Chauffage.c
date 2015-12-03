@@ -10,12 +10,15 @@
 --------------------------------------------------------------------------------------------------*/
 
 #include "Chauffage.h"
-#include "Conf.h"
+#include "ConfIni.h"
+#include "fct_DatabaseEeprom.h"
 
 
 /*--------------------------------------------------------------------------------------------------
 	PRIVATE DEFINE
 --------------------------------------------------------------------------------------------------*/
+
+#define LogId			"CHAUFFAGE"
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -27,7 +30,12 @@
 	PRIVATE DATA DECLARATION
 --------------------------------------------------------------------------------------------------*/
 
-static Chauffage_t This;
+static Chauffage_t This =
+{
+		.Cfg_SeuilStart_DegC	= 20,
+		.Cfg_SeuilStop_DegC		= 23,
+		.Cfg_TempoApresCh_s		= 300,
+};
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -38,29 +46,47 @@ static Chauffage_t This;
 /*------------------------------------------------------------------------------------------------*/
 void Chauffage_Init(void)
 {
+	Chauffage_t TmpThis;
+
+
 	//------------------------------------------------------
-	// Lecture de la configuration
+	// Lecture des donnees flash
 	//------------------------------------------------------
-	if (Parametres_Init(&Conf_IniFile) != Status_OK)
+	DatabaseEeprom_InitData(DatabaseEeprom_Chauffage, NULL, sizeof(Chauffage_t));
+	if (DatabaseEeprom_Read(DatabaseEeprom_Chauffage, &TmpThis) == Status_KO)
 	{
-		_printf("Conf forced to default value\n");
+		DatabaseEeprom_Write(DatabaseEeprom_Chauffage, &This);
+		memcpy(&TmpThis, &This, sizeof(Chauffage_t));
 	}
-	Parametres_OpenReadFile(&Conf_IniFile);
+	else
+	{
+		memcpy(&This, &TmpThis, sizeof(Chauffage_t));
+	}
 
-	Parametres_Read(&Conf_IniFile,	Conf_CH_SeuilStart_DegC	,	&This.SeuilStart_DegC	);
-	Parametres_Read(&Conf_IniFile,	Conf_CH_SeuilStop_DegC	,	&This.SeuilStop_DegC	);
-	Parametres_Read(&Conf_IniFile,	Conf_CH_TempoApresCh_s	,	&This.TempoApresCh_s	);
 
-	Parametres_CloseFile(&Conf_IniFile);
+	//------------------------------------------------------
+	// Comparaison avec fichier ini
+	//------------------------------------------------------
+	if (ConfIni_Get()->IsValide == TRUE)
+	{
+		This.Cfg_SeuilStart_DegC	= ConfIni_Get()->CH_SeuilStart_DegC;
+		This.Cfg_SeuilStop_DegC		= ConfIni_Get()->CH_SeuilStop_DegC;
+		This.Cfg_TempoApresCh_s		= ConfIni_Get()->CH_TempoApresCh_s;
+
+		if (memcmp(&TmpThis, &This, sizeof(Chauffage_t)) != 0)
+		{
+			DatabaseEeprom_Write(DatabaseEeprom_Chauffage, &This);
+		}
+	}
 
 
 	//------------------------------------------------------
 	// Affichage de la configuration
 	//------------------------------------------------------
-	_printf("--- CONF CHAUFFAGE ---\n");
-	_printf("SeuilStart_DegC = %d\n"	,	This.SeuilStart_DegC	);
-	_printf("SeuilStop_DegC  = %d\n"	,	This.SeuilStop_DegC		);
-	_printf("TempoApresCh_s  = %d\n"	,	This.TempoApresCh_s		);
+	_CONSOLE( LogId, "--- CONF CHAUFFAGE ---\n");
+	_CONSOLE( LogId, "SeuilStart_DegC = %d\n"	,	This.Cfg_SeuilStart_DegC	);
+	_CONSOLE( LogId, "SeuilStop_DegC  = %d\n"	,	This.Cfg_SeuilStop_DegC		);
+	_CONSOLE( LogId, "TempoApresCh_s  = %d\n"	,	This.Cfg_TempoApresCh_s		);
 }
 
 
