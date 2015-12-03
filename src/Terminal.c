@@ -189,6 +189,26 @@ void Cmd_Rename(char* bufferIn, pSendResponse_f Terminal_Write)
 	}
 }
 
+void Cmd_Format(char* bufferIn, pSendResponse_f Terminal_Write)
+{
+	uint8_t NbParam = Terminal_ParseString(bufferIn, DELIMITER, Param);
+
+	if (NbParam != 1)
+	{
+		Terminal_Write("format : WRONG PARAM\n");
+		return;
+	}
+
+	if (MemoireFAT_Erase() == FR_OK)
+	{
+		Terminal_Write("format : OK\n");
+	}
+	else
+	{
+		Terminal_Write("format : ERROR\n");
+	}
+}
+
 void Cmd_Read(char* bufferIn, pSendResponse_f Terminal_Write)
 {
 	uint8_t NbParam = Terminal_ParseString(bufferIn, DELIMITER, Param);
@@ -290,6 +310,8 @@ void Cmd_Rtc(char* bufferIn, pSendResponse_f Terminal_Write)
 		Terminal_Write(tmpBuffer);
 	}
 }
+
+
 
 
 
@@ -470,11 +492,13 @@ Terminal_Init(
 	Terminal_RegisterCommand("quit",	Cmd_Quit,				"Fonction d'arret");
 	Terminal_RegisterCommand("ls",		Cmd_ListFiles,			"Affichage de la liste des fichiers d'un repertoire");
 	Terminal_RegisterCommand("reboot",	Cmd_Reboot,				"Redémarrage SW");
-	Terminal_RegisterCommand("delete",	Cmd_Delete,				"Effacement d'un fichier");
+	Terminal_RegisterCommand("delete",	Cmd_Delete,				"Effacement d'un fichier ou d'un reportoire");
 	Terminal_RegisterCommand("rename",	Cmd_Rename,				"Renommage d'un fichier");
-	Terminal_RegisterCommand("read",	Cmd_Read,				"Lecture dun contenu d'un fichier");
+	Terminal_RegisterCommand("read",	Cmd_Read,				"Lecture d'un contenu d'un fichier");
 	Terminal_RegisterCommand("rtc",		Cmd_Rtc,				"Gestion de la RTC");
+	Terminal_RegisterCommand("format",	Cmd_Format,				"Formatage de la carte SD");
 }
+
 
 /**
  ***************************************************************************************************

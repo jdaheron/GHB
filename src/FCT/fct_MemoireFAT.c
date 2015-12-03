@@ -270,7 +270,6 @@ MemoireFAT_DeInit(
 		void
 )
 {
-
 	Memoire.InitOk = FALSE;
 
 	f_mount(NULL, Memoire.DrivePath, 0);	// Unmout
@@ -348,27 +347,47 @@ Bool_e
 MemoireFAT_Erase(
 		void
 ) {
-#if 0	//TODO JD
-	uint8_t buff[MEMORY_SECTOR_SIZE];
-	uint32_t i;
+#if 1	//TODO JD
+	uint8_t buff[2048];
+	DRESULT res;
+	uint16_t block_size;
+	int NbSectorToErase = 100;
+
 
 	// Verification memoire disponible
-	if (eMemoire_IsReady() == FALSE)
+	if (MemoireFAT_IsReady() == FALSE)
 		return FR_DENIED;
 
 	_MEMOIRE_CONSOLE("[Memoire] Erase\n");
 
-	// Init du disque si necessaire
-	disk_initialize(MEMOIRE_TYPE);
+	Memoire.DiskDriver->disk_ioctl(GET_SECTOR_SIZE, &block_size);
+	if (block_size > 1024)
+		block_size = 1024;
 
-	// Remplissage buffer
-	for (i=0; i<MEMORY_SECTOR_SIZE; i++) buff[i] = 0xFF;
+	memset(buff, 0, 1024);
 
-	// Effacement des 100 premiers secteurs pour corrompre la FAT.
-	for (i=0; i<100; i++){
-		disk_write(MEMOIRE_TYPE, buff, i, 1);
-		vDelay_ms(2);
+	f_unlink(Memoire.DrivePath);
+
+	// Effacement des X premiers secteurs pour corrompre la FAT.
+	for (int i = 0; i < NbSectorToErase; i++)
+	{
+		res = disk_write(0, buff, i, 1);
+		Delay_ms(5);
+
+		if ((i % 100) == 0)
+		{
+			WDG_Refresh();
+		}
 	}
+
+	WDG_Disable();
+
+	FATFS_UnLinkDriver(Memoire.DrivePath);
+	Memoire.InitOk = FALSE;
+	MemoireFAT_Init(Memoire.DiskDriver);
+
+	WDG_InitWWDG(2000);
+
 #endif
 	return FR_OK;
 }

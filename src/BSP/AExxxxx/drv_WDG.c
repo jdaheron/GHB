@@ -12,6 +12,7 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "drv_WDG.h"
+#include "util_printf.h"
 
 
 /* External variables --------------------------------------------------------*/
@@ -154,6 +155,8 @@ void WDG_Tick(){
 	if (WWDG_Cnt == 0) {
 
 		WWDG_SetCounter(0x40);
+
+		_printf("WDT Timeout\n");
 		// Attente reboot
 		while(1);
 	}

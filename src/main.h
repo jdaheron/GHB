@@ -49,7 +49,11 @@
 #define IP_ADDR0	192
 #define IP_ADDR1	168
 #define IP_ADDR2	1
-#define IP_ADDR3	200
+#ifdef DEBUG_AVEC_BL
+	#define IP_ADDR3	200
+#else
+	#define IP_ADDR3	201
+#endif
 
 /*NETMASK*/
 #define NETMASK_ADDR0	255
