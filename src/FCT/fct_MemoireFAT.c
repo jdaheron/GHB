@@ -193,6 +193,8 @@ MemoireFAT_Init(
 	FIL File;
 	FRESULT FRes;
 	uint16_t block_size;
+	static MsgSent = FALSE;
+
 
 	if (DiskDriver == NULL)
 		return FALSE;
@@ -251,10 +253,15 @@ MemoireFAT_Init(
 
 		_MEMOIRE_CONSOLE("[Memoire] FS OK\n");
 		Memoire.InitOk = TRUE;
+		MsgSent = FALSE;
 	}
 	else
 	{
-		_MEMOIRE_CONSOLE("[Memoire] FS ERROR\n");
+		if (MsgSent == FALSE)
+		{
+			_MEMOIRE_CONSOLE("[Memoire] FS ERROR\n");
+			MsgSent = TRUE;
+		}
 		MemoireFAT_DeInit();
 	}
 
@@ -386,7 +393,7 @@ MemoireFAT_Erase(
 	Memoire.InitOk = FALSE;
 	MemoireFAT_Init(Memoire.DiskDriver);
 
-	WDG_InitWWDG(2000);
+	WDG_InitWWDG(10000);
 
 #endif
 	return FR_OK;

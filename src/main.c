@@ -122,6 +122,7 @@ static TSW_s Tmr_CH;
 static TSW_s Tmr_EXT;
 static TSW_s Tmr_RTC;
 static TSW_s Tmr_ARROSAGE;
+static TSW_s Tmr_DEFAULT;
 static Etat_e EtatVentillation = Etat_INACTIF;
 static Etat_e EtatChauffage = Etat_INACTIF;
 static Etat_e EtatArrosage = Etat_INACTIF;
@@ -658,7 +659,7 @@ int main(void)
 
 	//Mode_Test();
 
-	WDG_InitWWDG(2000);
+	WDG_InitWWDG(10000);
 
 	_printf("--- StartupTime=%dms ---\n\n", TSW_GetTimestamp_ms());
 	while(1)
@@ -881,8 +882,11 @@ int main(void)
 					EtatVentillation 	= Etat_INACTIF;
 					EtatChauffage		= Etat_INACTIF;
 					EtatArrosage		= Etat_INACTIF;
+
+					TSW_Start(&Tmr_DEFAULT, 60000);
 				}
-				else
+
+				if (TSW_IsRunning(&Tmr_DEFAULT) == FALSE)
 				{
 					_printf("REBOOT...\n");
 					TSW_Delay(5000);
