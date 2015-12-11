@@ -43,11 +43,29 @@ static uint16_t CurrentOut_MaxSize = 0;
 static char*	CurrentOut_Buffer = NULL;
 static uint16_t	CurrentOut_Size = 0;
 static Bool_e	CurrentOut_Error = FALSE;
+void Cmd_Format(char* bufferIn, pSendResponse_f Terminal_Write)
+{
+	uint8_t NbParam = Terminal_ParseString(bufferIn, DELIMITER, Param);
+
+	if (NbParam != 1)
+	{
+		Terminal_Write("format : WRONG PARAM\n");
+		return;
+	}
+
+	if (MemoireFAT_Erase() == FR_OK)
+	{
+		Terminal_Write("format : OK\n");
+	}
+	else
+	{
+		Terminal_Write("format : ERROR\n");
+	}
+}
+
 
 
 /*--------------------------------------------------------------------------------------------------
-	FUNCTIONS DEFINITIONS
---------------------------------------------------------------------------------------------------*/
 
 
 /*------------------------------------------------------------------------------------------------*/
@@ -126,7 +144,9 @@ void Terminal_Init(void)
 
 	// Declaration (systematique) de la commande "list"
 	Terminal_RegisterCommand("list",	Terminal_PrintCmdList,	"Impression de la liste de commandes disponibles");
+	Terminal_RegisterCommand("format",	Cmd_Format,				"Formatage de la carte SD");
 }
+
 
 
 /*------------------------------------------------------------------------------------------------*/

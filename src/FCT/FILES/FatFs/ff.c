@@ -108,6 +108,7 @@
 
 #include <FILES/FatFs/diskio.h>		/* Declarations of disk I/O functions */
 #include <FILES/FatFs/ff.h>			/* Declarations of FatFs API */
+#include <stdio.h>
 
 
 /*--------------------------------------------------------------------------

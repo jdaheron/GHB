@@ -39,7 +39,7 @@
 
 /* External Variables *****************************************************************************/
 
-const char VERSION_SW[] = {"00001ZAG"};
+const char VERSION_SW[] = {"00001AAH"};
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
 #ifdef DEBUG_AVEC_BL
@@ -129,6 +129,7 @@ static TSW_s		Tmr_START;
 static TSW_s		Tmr_CH;
 static TSW_s		Tmr_EXT;
 static TSW_s		Tmr_RTC;
+static TSW_s Tmr_DEFAULT;
 static Etat_e		EtatVentillation = Etat_INACTIF;
 static Etat_e		EtatChauffage = Etat_INACTIF;
 static float		Temperature = 0;
@@ -523,7 +524,7 @@ int main(void)
 
 	//Mode_Test();
 
-	WDG_InitWWDG(2000);
+	WDG_InitWWDG(10000);
 
 	_CONSOLE( LogId, "--- StartupTime=%dms ---\n\n", TSW_GetTimestamp_ms());
 	while(1)
@@ -741,8 +742,11 @@ int main(void)
 					EtatVentillation 	= Etat_INACTIF;
 					EtatChauffage		= Etat_INACTIF;
 					Arrosage_Stop();
+
+					TSW_Start(&Tmr_DEFAULT, 60000);
 				}
-				else
+
+				if (TSW_IsRunning(&Tmr_DEFAULT) == FALSE)
 				{
 					if (REBOOT_ON_DEFAULT_MODE == TRUE)
 					{
