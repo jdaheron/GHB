@@ -48,7 +48,11 @@ typedef struct
 --------------------------------------------------------------------------------------------------*/
 
 static Ethernet_t This = {
+	#ifdef DEBUG_AVEC_BL
 		.Cfg_IP_Adresse		= {192, 168,   1, 200},
+	#else
+		.Cfg_IP_Adresse		= {192, 168,   1, 201},
+	#endif
 		.Cfg_IP_Masque		= {255, 255, 255,   0},
 		.Cfg_IP_Passerelle	= {192, 168,   1, 254},
 		.Cfg_MAC_Adresse	= {0, 0, 0, 0, 0, 1},

@@ -91,6 +91,16 @@ typedef struct {
 } Horodatage_s;
 
 
+/** Liste des etapes d'init de la RTC. */
+typedef enum
+{
+	RTC_ETAPE_INIT	 = 0,
+	RTC_ETAPE_ATTENTE_STABILISATION,
+	RTC_ETAPE_ENABLE_RTC_CLOCK,
+	RTC_ETAPE_ATTENTE_SYNCHRONISATION,
+	RTC_ETAPE_READY
+
+} RTC_Etape_e;
 
 /**
  * @}
@@ -140,8 +150,7 @@ RTC_StartInit(
  * @brief	Gestion de la RTC.
  * @return 	void
  */
-void
-RTC_Main(
+RTC_Etape_e	RTC_Main(
 		void
 );
 
@@ -202,6 +211,9 @@ Horodatage_s RTC_GetHorodatageFromTimestamp(
 uint32_t RTC_GetTimestamp(
 		void
 );
+
+char* RTC_GetDayString(JourSemaine_e JourSemaine, uint8_t StrLen);
+
 
 /**
  * @brief	Ecriture dans un registre du domaine de Backup RTC.

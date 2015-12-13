@@ -15,6 +15,7 @@
 #include "util_TSW.h"
 #include "util_printf.h"
 #include "Arrosage.h"
+#include "Modes.h"
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -40,6 +41,13 @@ typedef struct
 /*--------------------------------------------------------------------------------------------------
 	PRIVATE DATA DECLARATION
 --------------------------------------------------------------------------------------------------*/
+
+extern Etat_e		EtatVentillation;
+extern Etat_e		EtatChauffage;
+extern Mode_e		Mode;
+extern float		Temperature;
+extern float		Hygrometrie;
+extern Horodatage_s StartTime;
 
 static char* Param[16];
 
@@ -111,6 +119,28 @@ void Cmd_Delete(char* bufferIn, pSendResponse_f Terminal_Write)
 
 
 /*------------------------------------------------------------------------------------------------*/
+void Cmd_Format(char* bufferIn, pSendResponse_f Terminal_Write)
+{
+	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
+
+	if (NbParam != 1)
+	{
+		Terminal_Write("format : WRONG PARAM\n");
+		return;
+	}
+
+	if (MemoireFAT_Erase() == FR_OK)
+	{
+		Terminal_Write("format : OK\n");
+	}
+	else
+	{
+		Terminal_Write("format : ERROR\n");
+	}
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
 void Cmd_Rename(char* bufferIn, pSendResponse_f Terminal_Write)
 {
 	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
@@ -165,14 +195,7 @@ void Cmd_Rtc(char* bufferIn, pSendResponse_f Terminal_Write)
 {
 	Horodatage_s Time;
 	char tmpBuffer[128];
-	char* LUNDI		= {"LUN"};
-	char* MARDI		= {"MAR"};
-	char* MERCREDI	= {"MER"};
-	char* JEUDI		= {"JEU"};
-	char* VENDREDI	= {"VEN"};
-	char* SAMEDI	= {"SAM"};
-	char* DIMANCHE	= {"DIM"};
-	char* Jour;
+	char day[10];
 
 
 	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
@@ -183,24 +206,20 @@ void Cmd_Rtc(char* bufferIn, pSendResponse_f Terminal_Write)
 		Terminal_Write("rtc WRONG PARAM\n");
 		return;
 	}
+
 	RTC_Lire(&Time);
 
-
+	//--------------------------------------------------------------------------------
 	if (strncmp(Param[1], "set", 3) == 0)
 	{
-		_sprintf(tmpBuffer, "RTC = %d %02d %02d %02d %02d %02d %08d",
-			Time.Annee, Time.Mois, Time.Jour,
-			Time.Heure, Time.Minute, Time.Seconde,
-			TSW_GetTimestamp_ms());
-
-		if 		(strncmp(Param[2], LUNDI, 3)	== 0)	Time.JourSemaine = 1;
-		else if (strncmp(Param[2], MARDI, 3)	== 0)	Time.JourSemaine = 2;
-		else if (strncmp(Param[2], MERCREDI, 3)	== 0)	Time.JourSemaine = 3;
-		else if (strncmp(Param[2], JEUDI, 3)	== 0)	Time.JourSemaine = 4;
-		else if (strncmp(Param[2], VENDREDI, 3)	== 0)	Time.JourSemaine = 5;
-		else if (strncmp(Param[2], SAMEDI, 3)	== 0)	Time.JourSemaine = 6;
-		else if (strncmp(Param[2], DIMANCHE, 3)	== 0)	Time.JourSemaine = 7;
-		else											Time.JourSemaine = 1;
+		if 		(!strncmp(Param[2], RTC_GetDayString(LUNDI,		3), 3))	Time.JourSemaine = 1;
+		else if (!strncmp(Param[2], RTC_GetDayString(MARDI,		3), 3))	Time.JourSemaine = 2;
+		else if (!strncmp(Param[2], RTC_GetDayString(MERCREDI,	3), 3))	Time.JourSemaine = 3;
+		else if (!strncmp(Param[2], RTC_GetDayString(JEUDI, 	3), 3))	Time.JourSemaine = 4;
+		else if (!strncmp(Param[2], RTC_GetDayString(VENDREDI,	3), 3))	Time.JourSemaine = 5;
+		else if (!strncmp(Param[2], RTC_GetDayString(SAMEDI,	3), 3))	Time.JourSemaine = 6;
+		else if (!strncmp(Param[2], RTC_GetDayString(DIMANCHE,	3), 3))	Time.JourSemaine = 7;
+		else															Time.JourSemaine = 1;
 
 		Time.Jour			= strtoul(Param[3], NULL ,10);
 		Time.Mois			= strtoul(Param[4], NULL ,10);
@@ -215,26 +234,44 @@ void Cmd_Rtc(char* bufferIn, pSendResponse_f Terminal_Write)
 		strncpy(Param[1], "get", 3);
 	}
 
+	//--------------------------------------------------------------------------------
 	if (strncmp(Param[1], "get", 3) == 0)
 	{
-		switch (Time.JourSemaine)
-		{
-			case 1 : Jour = LUNDI	;	break;
-			case 2 : Jour = MARDI	;	break;
-			case 3 : Jour = MERCREDI;	break;
-			case 4 : Jour = JEUDI	;	break;
-			case 5 : Jour = VENDREDI;	break;
-			case 6 : Jour = SAMEDI	;	break;
-			case 7 : Jour = DIMANCHE;	break;
-		}
-
+		memset(day, 0, 10);
+		strncpy(day, RTC_GetDayString(Time.JourSemaine, 3), 3);
 		_sprintf(tmpBuffer, "%s %02d %02d %d %02d %02d %02d %08d",
-					Jour, Time.Jour, Time.Mois, Time.Annee,
-					Time.Heure, Time.Minute, Time.Seconde,
-					TSW_GetTimestamp_ms());
+				day, Time.Jour, Time.Mois, Time.Annee,
+				Time.Heure, Time.Minute, Time.Seconde,
+				TSW_GetTimestamp_ms());
 
 		Terminal_Write(tmpBuffer);
 	}
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+void Cmd_StartupTime(char* bufferIn, pSendResponse_f Terminal_Write)
+{
+	char tmpBuffer[128];
+	char day[10];
+
+
+	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
+
+	if (NbParam != 1)
+	{
+		Terminal_Write("startup : WRONG PARAM\n");
+		return;
+	}
+
+	memset(day, 0, 10);
+	strncpy(day, RTC_GetDayString(StartTime.JourSemaine, 3), 10);
+	_sprintf(tmpBuffer, "%s %02d %02d %d %02d %02d %02d %08d",
+			day, StartTime.Jour, StartTime.Mois, StartTime.Annee,
+			StartTime.Heure, StartTime.Minute, StartTime.Seconde,
+			TSW_GetTimestamp_ms());
+
+	Terminal_Write(tmpBuffer);
 }
 
 
@@ -283,19 +320,56 @@ void Cmd_Reservoir(char* bufferIn, pSendResponse_f Terminal_Write)
 
 
 /*------------------------------------------------------------------------------------------------*/
+void Cmd_Status(char* bufferIn, pSendResponse_f Terminal_Write)
+{
+	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
+	Horodatage_s Time;
+	char tmpBuffer[256];
+	char day[10];
+
+	if (NbParam != 1)
+	{
+		Terminal_Write("status : WRONG PARAM\n");
+		return;
+	}
+
+	RTC_Lire(&Time);
+
+	memset(day, 0, 10);
+	strncpy(day, RTC_GetDayString(Time.JourSemaine, 3), 3);
+	_sprintf(tmpBuffer, "%s %02d %02d %d %02d %02d %02d %08d %d %d %d %d %f %f",
+			day, Time.Jour, Time.Mois, Time.Annee,
+			Time.Heure, Time.Minute, Time.Seconde,
+			TSW_GetTimestamp_ms(),
+			Mode,
+			EtatVentillation,
+			EtatChauffage,
+			Arrosage_Get()->Etat,
+			Temperature,
+			Hygrometrie
+	);
+
+	Terminal_Write(tmpBuffer);
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
 void Terminal_Cmd_Init(void)
 {
 	//TODO : DEBUG
-	Terminal_RegisterCommand("quit",		Cmd_Quit,		"Fermeture de la communication");
-	Terminal_RegisterCommand("ls",			Cmd_ListFiles,	"Affichage de la liste des fichiers d'un repertoire");
-	Terminal_RegisterCommand("reboot",		Cmd_Reboot,		"Redémarrage SW");
-	Terminal_RegisterCommand("test",		Cmd_Test,		"Commande de test");
-	Terminal_RegisterCommand("delete",		Cmd_Delete,		"Effacement d'un fichier");
-	Terminal_RegisterCommand("rename",		Cmd_Rename,		"Renommage d'un fichier");
-	Terminal_RegisterCommand("read",		Cmd_Read,		"Lecture dun contenu d'un fichier");
-	Terminal_RegisterCommand("rtc",			Cmd_Rtc,		"Gestion de la RTC");
-	Terminal_RegisterCommand("arroser",		Cmd_Arroser,	"Lancement d'un arrosage immédiat");
-	Terminal_RegisterCommand("reservoir",	Cmd_Reservoir,	"Ecriture de l'etat du remplissage du reservoir");
+	Terminal_RegisterCommand("quit",		Cmd_Quit,			"Fermeture de la communication");
+	Terminal_RegisterCommand("ls",			Cmd_ListFiles,		"Affichage de la liste des fichiers d'un repertoire");
+	Terminal_RegisterCommand("reboot",		Cmd_Reboot,			"Redémarrage SW");
+	Terminal_RegisterCommand("test",		Cmd_Test,			"Commande de test");
+	Terminal_RegisterCommand("delete",		Cmd_Delete,			"Effacement d'un fichier");
+	Terminal_RegisterCommand("format",		Cmd_Format,			"Formatage de la carte SD");
+	Terminal_RegisterCommand("rename",		Cmd_Rename,			"Renommage d'un fichier");
+	Terminal_RegisterCommand("read",		Cmd_Read,			"Lecture dun contenu d'un fichier");
+	Terminal_RegisterCommand("rtc",			Cmd_Rtc,			"Gestion de la RTC");
+	Terminal_RegisterCommand("startup",		Cmd_StartupTime,	"Lecture de l'heure de demarrage");
+	Terminal_RegisterCommand("arroser",		Cmd_Arroser,		"Lancement d'un arrosage immédiat");
+	Terminal_RegisterCommand("reservoir",	Cmd_Reservoir,		"Ecriture de l'etat du remplissage du reservoir");
+	Terminal_RegisterCommand("status",		Cmd_Status,			"Lecture de l'etat de la carte");
 }
 
 
