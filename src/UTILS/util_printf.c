@@ -30,7 +30,7 @@
 #include "util_printf.h"
 #include "usbd_cdc_interface.h"
 #define _putchar(c) Console_Send((uint8_t) c)
-
+//TODO JD : #define _putchar(c) CDC_Transmit((uint8_t*) &c, 1)
 
 static void printchar(char **str, int c)
 {
@@ -147,13 +147,13 @@ static int printfloat(char **out, double f, int width, int precision, int pad)
     }
     else
     {
-        pc += printi (out, (int)(fractpart) , 10, 0, 1, 0, 'a');
+        pc += printi (out, (int)(fractpart) , 10, 0, precision, PAD_ZERO, 'a');
     }
     return pc ;
 }
 
 
-static int print(char **out, const char *format, va_list args )
+int print(char **out, const char *format, va_list args )
 {
     register int width, precision, pad;
 	register int pc = 0;
@@ -241,10 +241,15 @@ static int print(char **out, const char *format, va_list args )
 
 int _printf(const char *format, ...)
 {
-        va_list args;
-        
-        va_start( args, format );
-        return print( 0, format, args );
+	va_list args;
+
+	va_start( args, format );
+	return print( 0, format, args );
+}
+
+int _no_printf(const char *format, ...)
+{
+	return(0);
 }
 
 int _sprintf(char *out, const char *format, ...)

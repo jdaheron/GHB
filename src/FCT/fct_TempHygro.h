@@ -94,7 +94,6 @@ typedef struct {
 
 
 void 	TempHygro_Init(uint32_t PeriodeAcquisition_ms);
-void 	TempHygro_Read(void);
 void 	TempHygro_Thread(void);
 Bool_e 	TempHygro_IsValide(void);
 float 	TempHygro_GetTemperature(void);

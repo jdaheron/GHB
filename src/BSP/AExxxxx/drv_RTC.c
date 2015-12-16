@@ -30,18 +30,6 @@
  */
 
 
-/** Liste des etapes d'init de la RTC. */
-typedef enum
-{
-	RTC_ETAPE_INIT	 = 0,
-	RTC_ETAPE_ATTENTE_STABILISATION,
-	RTC_ETAPE_ENABLE_RTC_CLOCK,
-	RTC_ETAPE_ATTENTE_SYNCHRONISATION,
-	RTC_ETAPE_READY
-
-} RTC_Etape_e;
-
-
 /**
  * @}
  */ 
@@ -90,6 +78,17 @@ typedef enum
 static Bool_e		QuartzPresent	= FALSE;
 static RTC_Etape_e	Etape			= RTC_ETAPE_INIT;
 
+static char* DayString[] = {
+		{"LUNDI"},
+		{"MARDI"},
+		{"MERCREDI"},
+		{"JEUDI"},
+		{"VENDREDI"},
+		{"SAMEDI"},
+		{"DIMANCHE"}
+};
+
+
 /**
  * @}
  */ 
@@ -129,8 +128,7 @@ RTC_StartInit(
  ***************************************************************************************************
  * @todo Validation
  */
-void
-RTC_Main(
+RTC_Etape_e	RTC_Main(
 		void
 )
 {
@@ -199,6 +197,7 @@ RTC_Main(
 			break;
 	}
 
+	return Etape;
 }
 
 /**
@@ -419,8 +418,28 @@ uint32_t RTC_GetTimestamp(
 }
 
 
+/*------------------------------------------------------------------------------------------------*/
+char* RTC_GetDayString(JourSemaine_e JourSemaine, uint8_t StrLen)
+{
+	static char ReturnBuffer[10];
 
+	if ((JourSemaine == 0)
+	||	(JourSemaine > DIMANCHE))
+	{
+		return "";
+	}
 
+	if ((StrLen > 9)
+	||	(StrLen == 0))
+	{
+		StrLen = 9;
+	}
+
+	strncpy(ReturnBuffer, DayString[JourSemaine-1], 10);
+	ReturnBuffer[StrLen] = 0;
+
+	return ReturnBuffer;
+}
 
 
 /**
