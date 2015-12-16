@@ -26,6 +26,9 @@
 --------------------------------------------------------------------------------------------------*/
 
 #define LogId	"LOGS"
+#define LOG_DELAI_s						300		// ConfIni_Get()->GEN_LogPeriode_s
+#define LOG_DELAI_PENDANT_ACTION_s		300		// ConfIni_Get()->GEN_LogPeriodePendantAction_s
+
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -76,18 +79,18 @@ void Logs_Data(void)
 		);
 	}
 
-	_CONSOLE( LogId, "LOG:%s\n", LogBuffer);
+	_CONSOLE(LogId, "LOG:%s\n", LogBuffer);
 	LogFile_Write("", 0, LogBuffer);
 
 	if ((Mode == MODE_CHAUFFAGE)
 	||	(Mode == MODE_VENTILLATION)
-	||	(Arrosage_Get()->Etat == Etat_INACTIF))
+	||	(Arrosage_Get()->Etat == Etat_ACTIF))
 	{
-		TSW_Start(&Tmr_LOG, 1000 * ConfIni_Get()->GEN_LogPeriodePendantAction_s);
+		TSW_Start(&Tmr_LOG, 1000 * LOG_DELAI_PENDANT_ACTION_s);
 	}
 	else
 	{
-		TSW_Start(&Tmr_LOG, 1000 * ConfIni_Get()->GEN_LogPeriode_s);
+		TSW_Start(&Tmr_LOG, 1000 * LOG_DELAI_s);
 	}
 }
 

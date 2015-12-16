@@ -533,7 +533,7 @@ void process_tftp_request(struct pbuf *pkt_buf, struct ip_addr *addr, u16_t port
       /* Read the name of the file asked by the client to be sent from the SD card */
       tftp_extract_filename(FileName, pkt_buf->payload);
 
-      _CONSOLE( LogId, "TFTP_RRQ:%s\n", FileName);
+      _CONSOLE(LogId, "TFTP_RRQ:%s\n", FileName);
 
       /* could not open filesystem */
       if (f_mount(&filesystem, "", 0) != FR_OK)
@@ -555,7 +555,7 @@ void process_tftp_request(struct pbuf *pkt_buf, struct ip_addr *addr, u16_t port
       /* Read the name of the file asked by the client to be received and writen in the SD card */
       tftp_extract_filename(FileName, pkt_buf->payload);
   
-      _CONSOLE( LogId, "TFTP_WRQ:%s\n", FileName);
+      _CONSOLE(LogId, "TFTP_WRQ:%s\n", FileName);
 
       /* Could not open filesystem */
       if (f_mount(&filesystem, "", 0) != FR_OK)
@@ -627,11 +627,11 @@ void tftpd_init(void)
     }
     else
     {
-      _CONSOLE( LogId, "can not bind pcb");
+      _CONSOLE(LogId, "can not bind pcb");
     }
   }
   else
   {
-    _CONSOLE( LogId, "can not create new pcb");
+    _CONSOLE(LogId, "can not create new pcb");
   }
 }

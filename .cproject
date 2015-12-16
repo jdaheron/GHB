@@ -366,4 +366,5 @@
 			<resource resourceType="PROJECT" workspacePath="/ALJ00001Ax_prj"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

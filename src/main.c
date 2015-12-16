@@ -46,7 +46,7 @@
 	EXPORTED VARIABLES
 --------------------------------------------------------------------------------------------------*/
 
-const char VERSION_SW[] = {"00001AAZ"};
+const char VERSION_SW[] = {"00001AAI"};
 
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
@@ -117,7 +117,7 @@ void LifeBit_Main()
 		{
 			TSW_Start(&Tmr_LifeBit, 10);
 			Etat = Etat_ACTIF;
-			//_CONSOLE( LogId, "lb\n");
+			//_CONSOLE(LogId, "lb\n");
 		}
 		else
 		{
@@ -151,9 +151,9 @@ int main(void)
 	I2C1_Init(100 * 1000);						// 100kHz
 	ADC1_Init();
 
-	_CONSOLE( LogId, "\n--- START - ALJ");
-	_CONSOLE( LogId, VERSION_SW);
-	_CONSOLE( LogId, " ---\n");
+	_CONSOLE(LogId, "\n--- START - ALJ");
+	_CONSOLE(LogId, VERSION_SW);
+	_CONSOLE(LogId, " ---\n");
 
 	REGLAGE_RTC();
 
@@ -176,14 +176,14 @@ int main(void)
 	Terminal_Init();
 	Terminal_Cmd_Init();
 
-	//_CONSOLE( LogId, "MODE_FCT_SERVEUR\n");
+	//_CONSOLE(LogId, "MODE_FCT_SERVEUR\n");
 	ModeFct = MODE_FCT_SERVEUR;
 	//MemoireFAT_PrintFileList("httpserver");
 	Ethernet_Init();
 
 	if (RTC_BkpRegister_Read(0) != 0)
 	{
-		_CONSOLE( LogId, "MODE_FCT_USB\n");
+		_CONSOLE(LogId, "MODE_FCT_USB\n");
 		ModeFct = MODE_FCT_USB;
 		//USB_Init((Diskio_drvTypeDef*) &SdCard_SPI_Driver);
 		RTC_BkpRegister_Write(0, 0);
@@ -204,8 +204,10 @@ int main(void)
 
 
 	//--------------------------------------------------------------------------------
-	_CONSOLE( LogId, "--- StartupTime=%dms ---\n\n", TSW_GetTimestamp_ms());
-	while(1)
+	_CONSOLE(LogId, "--------------------------\n");
+	_CONSOLE(LogId, "StartupTime=%dms\n", TSW_GetTimestamp_ms());
+	_CONSOLE(LogId, "--------------------------\n\n");
+		while(1)
 	{
 		WDG_Refresh();
 
@@ -269,7 +271,7 @@ int main(void)
 			RTC_Lire(&Time);
 			TSW_ReStart(&Tmr_RTC);
 
-			//_CONSOLE( LogId, "RTC = %d-%02d-%02d %02d:%02d:%02d;%08d;",
+			//_CONSOLE(LogId, "RTC = %d-%02d-%02d %02d:%02d:%02d;%08d;",
 			//				Time.Annee, Time.Mois, Time.Jour,
 			//				Time.Heure, Time.Minute, Time.Seconde,
 			//				TSW_GetTimestamp_ms());
@@ -280,12 +282,12 @@ int main(void)
 		// AFFICHAGE TEMPERATURE
 /*		if (TSW_IsRunning(&TmrAffichTempHygro) == FALSE)
 		{
-			_CONSOLE( LogId, "TempHygro = ");
+			_CONSOLE(LogId, "TempHygro = ");
 			if (TempHygro_IsValide() == FALSE)
-				_CONSOLE( LogId, "Non valide\n");
+				_CONSOLE(LogId, "Non valide\n");
 			else
 			{
-				_CONSOLE( LogId, "%.01f %c\t%.01f %c\n",
+				_CONSOLE(LogId, "%.01f %c\t%.01f %c\n",
 						Temperature, '°',
 						Hygrometrie, '%');
 			}
@@ -311,7 +313,7 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_CONSOLE( LogId, "----- MODE_DEMARRAGE -----\n");
+					_CONSOLE(LogId, "----- MODE_DEMARRAGE -----\n");
 					Logs_Data();
 				}
 
@@ -328,7 +330,7 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_CONSOLE( LogId, "----- MODE_SURVEILLANCE -----\n");
+					_CONSOLE(LogId, "----- MODE_SURVEILLANCE -----\n");
 					Logs_Data();
 
 					EtatVentillation = Etat_INACTIF;
@@ -359,7 +361,7 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_CONSOLE( LogId, "----- MODE_CHAUFFAGE -----\n");
+					_CONSOLE(LogId, "----- MODE_CHAUFFAGE -----\n");
 					Logs_Data();
 
 					if (Ventilation_Get()->Cfg_ActiverPendantChauffage)
@@ -385,7 +387,7 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_CONSOLE( LogId, "----- MODE_VENTILLATION -----\n");
+					_CONSOLE(LogId, "----- MODE_VENTILLATION -----\n");
 					Logs_Data();
 
 					EtatChauffage = Etat_INACTIF;
@@ -407,7 +409,7 @@ int main(void)
 
 				if (NouveauMode)
 				{
-					_CONSOLE( LogId, "----- MODE_DEFAUT -----\n");
+					_CONSOLE(LogId, "----- MODE_DEFAUT -----\n");
 					Logs_Data();
 
 					EtatVentillation 	= Etat_INACTIF;
@@ -421,7 +423,7 @@ int main(void)
 				{
 					if (REBOOT_ON_DEFAULT_MODE == TRUE)
 					{
-						_CONSOLE( LogId, "REBOOT...\n");
+						_CONSOLE(LogId, "REBOOT...\n");
 						TSW_Delay(5000);
 						GOTO(0);
 						Mode = MODE_DEMARRAGE;
@@ -435,13 +437,13 @@ int main(void)
 		// MAJ DES SORTIES
 		if (GPIO_Get(PORT_RELAIS_V_EXT) != EtatVentillation)
 		{
-			_CONSOLE( LogId, "Ventillation = %d\n", EtatVentillation);
+			_CONSOLE(LogId, "Ventillation = %d\n", EtatVentillation);
 			GPIO_Set(PORT_RELAIS_V_EXT, EtatVentillation);
 			//LogData();
 		}
 		if (GPIO_Get(PORT_RELAIS_CH) != EtatChauffage)
 		{
-			_CONSOLE( LogId, "Chauffage = %d\n", EtatChauffage);
+			_CONSOLE(LogId, "Chauffage = %d\n", EtatChauffage);
 			GPIO_Set(PORT_RELAIS_CH, EtatChauffage);
 			//LogData();
 		}

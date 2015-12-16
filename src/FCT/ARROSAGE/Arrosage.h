@@ -27,6 +27,7 @@
 
 typedef struct
 {
+	Bool_e 			Cfg_Restored;
 	char			Cfg_Heure[8];
 	uint32_t		Cfg_Intervalle_h;
 	uint32_t		Cfg_VolumeParPlant_ml;

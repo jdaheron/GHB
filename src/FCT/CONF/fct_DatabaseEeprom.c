@@ -57,7 +57,7 @@
 #define Write(a, b, c)	CAT24AA16_Write(a, b, c)
 #define ALIGN_PAGE(a)	CAT24AA16_PAGE_SIZE * (1 + ((2+a) / CAT24AA16_PAGE_SIZE))
 
-#define LogId			"DB_EEPROM"
+#define LogId			-1//"DB_EEPROM"
 
 /**
  * @}
@@ -86,25 +86,25 @@ static DatabaseEeprom_s DatabaseEeprom[NB_DatabaseEeprom] = {
 
 		// DatabaseEeprom_Arrosage
 		{
-				.StartAddress	= 0,	// (Size 1024 octets)
+				.StartAddress	= 0,	// (Size 128 octets)
 				.UseBkp			= FALSE,
 		},
 
 		// DatabaseEeprom_Chauffage
 		{
-				.StartAddress	= 1024,	 // (Size 1024 octets)
+				.StartAddress	= 128,	 // (Size 64 octets)
 				.UseBkp			= FALSE,
 		},
 
-		// DatabaseEeprom_Ethernet		 // (Size 1024 octets)
+		// DatabaseEeprom_Ethernet		 // (Size 64 octets)
 		{
-				.StartAddress	= 2048,
+				.StartAddress	= 192,
 				.UseBkp			= FALSE,
 		},
 
-		// DatabaseEeprom_Ventilation	// (Size 1024  octets)
+		// DatabaseEeprom_Ventilation	// (Size 64  octets)
 		{
-				.StartAddress	= 3072,
+				.StartAddress	= 256,
 				.UseBkp			= FALSE,
 		},
 };
@@ -158,7 +158,7 @@ static void ReadData(uint32_t StartAddress, DatabaseEeprom_s* pDB)
 }
 
 /**-----------------------------------------------------------------------------
- * @brief	Lecture d'une donnee.
+ * @brief	Ecriture d'une donnee.
  *
  */
 static void WriteData(uint32_t StartAddress, DatabaseEeprom_s* pDB)
@@ -235,7 +235,7 @@ DatabaseEeprom_Read(
 
 	//--------------------------------------
 	// Lecture des donnees
-	_CONSOLE( LogId, "---DatabaseEeprom_Read---\n");
+	_CONSOLE(LogId, "---DatabaseEeprom_Read---\n");
 
 	// Lecture et verification Data0
 	ReadData(pDB->StartAddress, pDB);
@@ -256,14 +256,14 @@ DatabaseEeprom_Read(
 	Num1 = pDB->Num;
 	Data1_valide = IsValide(pDB);
 
-	_CONSOLE( LogId, "Data0: Num=%d | IsValide=%d\n", Num0, Data0_valide);
-	_CONSOLE( LogId, "Data1: Num=%d | IsValide=%d\n", Num1, Data1_valide);
+	_CONSOLE(LogId, "Data0: Num=%d | IsValide=%d\n", Num0, Data0_valide);
+	_CONSOLE(LogId, "Data1: Num=%d | IsValide=%d\n", Num1, Data1_valide);
 
 	//--------------------------------------
 	// Choix de la data a conserver
 	if (Data0_valide && Data1_valide)		// 2 Data valides (on prend le plus recente)
 	{
-		_CONSOLE( LogId, "Data0 et Data1 valides: ");
+		_CONSOLE(LogId, "Data0 et Data1 valides: ");
 		if ((Num0 == 0) && (Num1 == 0xFF))
 			ChoixData = 0;
 		else if ((Num0 == 0xFF) && (Num1 == 0))
@@ -283,20 +283,20 @@ DatabaseEeprom_Read(
 	switch (ChoixData)
 	{
 		case 0:
-			_CONSOLE( LogId, "utilisation de Data0.\n");
+			_CONSOLE(LogId, "utilisation de Data0.\n");
 			ReadData(pDB->StartAddress, pDB);	// Relecture de Data0
 			pDB->CurrentSpace = 0;
 			break;
 
 		case 1:
-			_CONSOLE( LogId, "utilisation de Data1.\n");
+			_CONSOLE(LogId, "utilisation de Data1.\n");
 			// Relecture inutile (deja stockee dans pData)
 			pDB->CurrentSpace = 1;
 			break;
 
 		case (-1):
 		default:
-			_CONSOLE( LogId, "Aucune Data valide. Restauration des valeurs par defaut.\n");
+			_CONSOLE(LogId, "Aucune Data valide. Restauration des valeurs par defaut.\n");
 			if (pDB->pDefaultData != NULL)
 			{
 				memcpy(pDB->pData, pDB->pDefaultData, pDB->Size);
@@ -340,7 +340,7 @@ DatabaseEeprom_Write(
 	//--------------------------------------
 	// Ecriture des donnees
 
-	_CONSOLE( LogId, "---DatabaseEeprom_Write---\n");
+	_CONSOLE(LogId, "---DatabaseEeprom_Write---\n");
 
 	// Incrementation du numero de sauvegarde
 	pDB->Num++;
@@ -350,7 +350,7 @@ DatabaseEeprom_Write(
 	if (pDB->CurrentSpace > 1)
 		pDB->CurrentSpace = 0;
 
-	_CONSOLE( LogId, "CurrentSpace=%d\n", pDB->CurrentSpace);
+	_CONSOLE(LogId, "CurrentSpace=%d\n", pDB->CurrentSpace);
 
 	// Enregistrement en EEPROM
 	if ((pDB->CurrentSpace == 0) || (pDB->UseBkp == FALSE))

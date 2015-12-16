@@ -12,7 +12,7 @@
 #include "Arrosage.h"
 #include "ConfIni.h"
 #include "fct_DatabaseEeprom.h"
-#include "util_printf.h"
+#include "util_CONSOLE.h"
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -33,12 +33,14 @@
 
 static Arrosage_t This =
 {
-		.Cfg_Heure					= "00:00",
+		.Cfg_Restored				= FALSE,
+		.Cfg_Heure					= "20:00",
 		.Cfg_Intervalle_h			= 0,
 		.Cfg_VolumeParPlant_ml		= 0,
 		.Cfg_NbPlants				= 1,
 		.Cfg_DebitPompe_ml_par_h	= 12300,
 		.Cfg_VolumeReservoir_ml		= 4500,
+
         .VolumeRestant_ml			= 0,
 		.TS_Precedent				= 0,
 		.TS_Suivant					= 0,
@@ -54,6 +56,10 @@ static Arrosage_t This =
 void Arrosage_Init(void)
 {
 	Arrosage_t TmpThis;
+	uint32_t Size = sizeof(Arrosage_t);
+
+
+	_CONSOLE(LogId, "---------- ARROSAGE INIT ----------\n");
 
 	//------------------------------------------------------
 	// Lecture des donnees flash
@@ -61,12 +67,16 @@ void Arrosage_Init(void)
 	DatabaseEeprom_InitData(DatabaseEeprom_Arrosage, NULL, sizeof(Arrosage_t));
 	if (DatabaseEeprom_Read(DatabaseEeprom_Arrosage, &TmpThis) == Status_KO)
 	{
+		_CONSOLE(LogId, "Invalid Eeprom Read: Default restored\n");
 		DatabaseEeprom_Write(DatabaseEeprom_Arrosage, &This);
 		memcpy(&TmpThis, &This, sizeof(Arrosage_t));
+		This.Cfg_Restored = TRUE;
 	}
 	else
 	{
+		_CONSOLE(LogId, "Valid Eeprom Read \n");
 		memcpy(&This, &TmpThis, sizeof(Arrosage_t));
+		This.Cfg_Restored = FALSE;
 	}
 
 
@@ -75,6 +85,8 @@ void Arrosage_Init(void)
 	//------------------------------------------------------
 	if (ConfIni_Get()->IsValide == TRUE)
 	{
+		_CONSOLE(LogId, "Check SD cfg\n");
+
 		memcpy(This.Cfg_Heure,			  ConfIni_Get()->ARR_Heure, 8);
 		This.Cfg_Intervalle_h			= ConfIni_Get()->ARR_Intervalle_h;
 		This.Cfg_VolumeParPlant_ml		= ConfIni_Get()->ARR_VolumeParPlant_ml;
@@ -84,26 +96,30 @@ void Arrosage_Init(void)
 
 		if (memcmp(&TmpThis, &This, sizeof(Arrosage_t)) != 0)
 		{
+			_CONSOLE(LogId, "Cfg SD copied\n");
 			DatabaseEeprom_Write(DatabaseEeprom_Arrosage, &This);
+		}
+		else
+		{
+			_CONSOLE(LogId, "Cfg unchanged\n");
 		}
 	}
 
 
 	//------------------------------------------------------
-	// Affichage de la configuration
+	// Affichage
 	//------------------------------------------------------
-	_CONSOLE( LogId, "--- ARROSAGE CONF ---\n");
-	_CONSOLE( LogId, "Heure               = %s\n",	This.Cfg_Heure					);
-	_CONSOLE( LogId, "Intervalle_h        = %d\n",	This.Cfg_Intervalle_h			);
-	_CONSOLE( LogId, "VolumeParPlant_ml   = %d\n",	This.Cfg_VolumeParPlant_ml		);
-	_CONSOLE( LogId, "NbPlants            = %d\n",	This.Cfg_NbPlants				);
-	_CONSOLE( LogId, "DebitPompe_ml_par_h = %d\n",	This.Cfg_DebitPompe_ml_par_h	);
-	_CONSOLE( LogId, "VolumeReservoir_ml  = %d\n",	This.Cfg_VolumeReservoir_ml		);
+	_CONSOLE(LogId, "Heure               = %s\n",	This.Cfg_Heure					);
+	_CONSOLE(LogId, "Intervalle_h        = %d\n",	This.Cfg_Intervalle_h			);
+	_CONSOLE(LogId, "VolumeParPlant_ml   = %d\n",	This.Cfg_VolumeParPlant_ml		);
+	_CONSOLE(LogId, "NbPlants            = %d\n",	This.Cfg_NbPlants				);
+	_CONSOLE(LogId, "DebitPompe_ml_par_h = %d\n",	This.Cfg_DebitPompe_ml_par_h	);
+	_CONSOLE(LogId, "VolumeReservoir_ml  = %d\n",	This.Cfg_VolumeReservoir_ml		);
 
-	_CONSOLE( LogId, "--- ARROSAGE STATUT ---\n");
-	_CONSOLE( LogId, "VolumeRestant_ml    = %d\n",	This.VolumeRestant_ml		);
-	_CONSOLE( LogId, "TS_Precedent        = %d\n",	This.TS_Precedent			);
-	_CONSOLE( LogId, "TS_Suivant          = %d\n",	This.TS_Suivant				);
+	_CONSOLE(LogId, "STATUS:\n");
+	_CONSOLE(LogId, "VolumeRestant_ml    = %d\n",	This.VolumeRestant_ml		);
+	_CONSOLE(LogId, "TS_Precedent        = %d\n",	This.TS_Precedent			);
+	_CONSOLE(LogId, "TS_Suivant          = %d\n",	This.TS_Suivant				);
 
 	This.GPIO = PORT_RELAIS_OPT1;
 	This.Etat = Etat_INACTIF;
@@ -143,7 +159,7 @@ void Arrosage_Management(void)
 	// Maj de l'etat de la sortie
 	if (GPIO_Get(This.GPIO) != This.Etat)
 	{
-		_CONSOLE( LogId, "GPIO Arrosage = %d\n", This.Etat);
+		_CONSOLE(LogId, "GPIO Arrosage = %d\n", This.Etat);
 		GPIO_Set(This.GPIO, This.Etat);
 	}
 }
@@ -185,17 +201,17 @@ void Arrosage_Start(uint32_t VolumeParPlant_ml)
 	//Parametres_Write(&Conf_IniFile,	Conf_ARR_TS_Suivant				,	&This.TS_Suivant			);
 
 	// Envoi des infos
-	_CONSOLE( LogId, "--- ARROSAGE START ---\n");
-	_CONSOLE( LogId, "VolumeParPlant_ml   = %d\n",	VolumeParPlant_ml			);
-	_CONSOLE( LogId, "Duree_s             = %d\n",	Duree_s						);
-	_CONSOLE( LogId, "VolumeRestant_ml    = %d\n",	This.VolumeRestant_ml		);
-	_CONSOLE( LogId, "TS_Precedent        = %d\n",	This.TS_Precedent			);
-	_CONSOLE( LogId, "TS_Suivant          = %d\n",	This.TS_Suivant				);
+	_CONSOLE(LogId, "--- ARROSAGE START ---\n");
+	_CONSOLE(LogId, "VolumeParPlant_ml   = %d\n",	VolumeParPlant_ml			);
+	_CONSOLE(LogId, "Duree_s             = %d\n",	Duree_s						);
+	_CONSOLE(LogId, "VolumeRestant_ml    = %d\n",	This.VolumeRestant_ml		);
+	_CONSOLE(LogId, "TS_Precedent        = %d\n",	This.TS_Precedent			);
+	_CONSOLE(LogId, "TS_Suivant          = %d\n",	This.TS_Suivant				);
 
 	// Lancement arrosage
 	TSW_Start(&This.TmrActif, Duree_s * 1000);
 
-	_CONSOLE( LogId, "--- ARROSAGE CONF ---\n");
+	_CONSOLE(LogId, "--- ARROSAGE CONF ---\n");
 }
 
 

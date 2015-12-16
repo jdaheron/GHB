@@ -155,7 +155,7 @@ void ConfIni_Init(void)
 	//------------------------------------------------------
 	if (Parametres_Init(&Conf_IniFile) != Status_OK)
 	{
-		_CONSOLE( LogId, "Conf forced to default value\n");
+		_CONSOLE(LogId, "Conf forced to default value\n");
 	}
 	Parametres_OpenReadFile(&Conf_IniFile);
 

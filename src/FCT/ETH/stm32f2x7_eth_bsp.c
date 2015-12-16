@@ -130,18 +130,18 @@ void ETH_BSP_Config(void)
 
 	if (PhyAddr > 32)
 	{
-		_CONSOLE( LogId, "Ethernet Phy Not Found\n\r");
+		_CONSOLE(LogId, "Ethernet Phy Not Found\n\r");
 		return;// 1;
 	}
 
 	/* Configure Ethernet */
 	if (ETH_Init(&ETH_InitStructure, PhyAddr) == 0)
 	{
-		_CONSOLE( LogId, "Ethernet Initialization Failed\n\r");
+		_CONSOLE(LogId, "Ethernet Initialization Failed\n\r");
 		return;// 1;
 	}
 
-	_CONSOLE( LogId, "Check LAN LEDs\n\r");
+	_CONSOLE(LogId, "Check LAN LEDs\n\r");
   
 #endif
 }

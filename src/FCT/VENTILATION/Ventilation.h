@@ -26,6 +26,7 @@
 
 typedef struct
 {
+	Bool_e 		Cfg_Restored;
 	uint32_t	Cfg_SeuilStop_DegC;
 	uint32_t	Cfg_SeuilStart_DegC;
 	uint32_t	Cfg_TempoApresEXT_s;

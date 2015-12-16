@@ -15,6 +15,9 @@
 #include "util_TSW.h"
 #include "util_printf.h"
 #include "Arrosage.h"
+#include "Chauffage.h"
+#include "Ethernet.h"
+#include "Ventilation.h"
 #include "Modes.h"
 
 
@@ -75,10 +78,26 @@ void Cmd_Reboot(char* bufferIn, pSendResponse_f Terminal_Write)
 /*------------------------------------------------------------------------------------------------*/
 void Cmd_ListFiles(char* bufferIn, pSendResponse_f Terminal_Write)
 {
+	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
 	char tmpBuffer[1024];
 
-	if (strlen(bufferIn) > 3)
-		MemoireFAT_PrintFileList(bufferIn + 3, tmpBuffer, 1024);
+
+	if (NbParam > 2)
+	{
+		Terminal_Write("ls : WRONG PARAM\n");
+		return;
+	}
+
+	if (MemoireFAT_IsReady() == FALSE)
+	{
+		Terminal_Write("Memory Not ready\n");
+		return;
+	}
+
+
+	if (NbParam == 2)
+	//if (strlen(bufferIn) > 3)
+		MemoireFAT_PrintFileList(Param[1], tmpBuffer, 1024);
 	else
 		MemoireFAT_PrintFileList("", tmpBuffer, 1024);
 
@@ -92,6 +111,7 @@ void Cmd_Test(char* bufferIn, pSendResponse_f Terminal_Write)
 	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
 	uint32_t TS;
 
+
 	TS = RTC_GetTimestamp();
 }
 
@@ -101,9 +121,16 @@ void Cmd_Delete(char* bufferIn, pSendResponse_f Terminal_Write)
 {
 	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
 
+
 	if (NbParam != 2)
 	{
 		Terminal_Write("delete : WRONG PARAM\n");
+		return;
+	}
+
+	if (MemoireFAT_IsReady() == FALSE)
+	{
+		Terminal_Write("Memory Not ready\n");
 		return;
 	}
 
@@ -123,9 +150,16 @@ void Cmd_Format(char* bufferIn, pSendResponse_f Terminal_Write)
 {
 	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
 
+
 	if (NbParam != 1)
 	{
 		Terminal_Write("format : WRONG PARAM\n");
+		return;
+	}
+
+	if (MemoireFAT_IsReady() == FALSE)
+	{
+		Terminal_Write("Memory Not ready\n");
 		return;
 	}
 
@@ -145,9 +179,16 @@ void Cmd_Rename(char* bufferIn, pSendResponse_f Terminal_Write)
 {
 	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
 
+
 	if (NbParam != 3)
 	{
 		Terminal_Write("rename : WRONG PARAM\n");
+		return;
+	}
+
+	if (MemoireFAT_IsReady() == FALSE)
+	{
+		Terminal_Write("Memory Not ready\n");
 		return;
 	}
 
@@ -175,6 +216,12 @@ void Cmd_Read(char* bufferIn, pSendResponse_f Terminal_Write)
 	if (NbParam != 2)
 	{
 		Terminal_Write("read : WRONG PARAM\n");
+		return;
+	}
+
+	if (MemoireFAT_IsReady() == FALSE)
+	{
+		Terminal_Write("Memory Not ready\n");
 		return;
 	}
 
@@ -352,6 +399,21 @@ void Cmd_Status(char* bufferIn, pSendResponse_f Terminal_Write)
 	Terminal_Write(tmpBuffer);
 }
 
+/*------------------------------------------------------------------------------------------------*/
+void Cmd_CfgDefault(char* bufferIn, pSendResponse_f Terminal_Write)
+{
+	char tmpBuffer[256];
+
+	_sprintf(tmpBuffer, "CfgDefault:\nArrosage    = %d\nChauffage   = %d\nEthernet    = %d\nVentilation = %d",
+			Arrosage_Get()->Cfg_Restored,
+			Chauffage_Get()->Cfg_Restored,
+			Ethernet_Get()->Cfg_Restored,
+			Ventilation_Get()->Cfg_Restored
+	);
+
+	Terminal_Write(tmpBuffer);
+}
+
 
 /*------------------------------------------------------------------------------------------------*/
 void Terminal_Cmd_Init(void)
@@ -370,6 +432,7 @@ void Terminal_Cmd_Init(void)
 	Terminal_RegisterCommand("arroser",		Cmd_Arroser,		"Lancement d'un arrosage immédiat");
 	Terminal_RegisterCommand("reservoir",	Cmd_Reservoir,		"Ecriture de l'etat du remplissage du reservoir");
 	Terminal_RegisterCommand("status",		Cmd_Status,			"Lecture de l'etat de la carte");
+	Terminal_RegisterCommand("cfgdef",		Cmd_CfgDefault,		"Flag conf par defaut");
 }
 
 

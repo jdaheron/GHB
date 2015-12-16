@@ -141,7 +141,7 @@ Status_e Parametres_Write(IniFile_s* IniFile, uint32_t NumParam, void* Value)
 	// Affichage des parametres
 	//Systeme_PrintParam();
 
-	//_CONSOLE( LogId, "Parametres Sauvegardes en %dms\n", TSW_GetTimestamp_ms() - Time );
+	//_CONSOLE(LogId, "Parametres Sauvegardes en %dms\n", TSW_GetTimestamp_ms() - Time );
 
 	return Statut;
 }

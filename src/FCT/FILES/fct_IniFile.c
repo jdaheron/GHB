@@ -343,7 +343,7 @@ IniFile_OpenRead(
 			break;
 
 		case MemFAT_FileCreated:
-			//_CONSOLE( LogId, "File created (%s)\n", IniFile->FileName);
+			//_CONSOLE(LogId, "File created (%s)\n", IniFile->FileName);
 			strcpy( IniData.pName, IniFile->FileName);
 			IniData.pName[ strlen(IniFile->FileName)] = '\0';
 			IniData.Position = 0;
@@ -391,7 +391,7 @@ IniFile_OpenReadIfExist(
 			break;
 
 		case MemFAT_FileCreated:
-			//_CONSOLE( LogId, "File created (%s)\n", IniFile->FileName);
+			//_CONSOLE(LogId, "File created (%s)\n", IniFile->FileName);
 			Status = IniFile_StatusKO;
 			break;
 
@@ -420,7 +420,7 @@ IniFile_OpenWrite(
 	// Verif presence repertoire, creation si besoin
 	if (MemoireFAT_IsDirectoryPresent((char*) IniFile->FileName, TRUE) == MemFAT_Error)
 	{
-		//_CONSOLE( LogId, "**ERROR** MemoireFAT_IsDirectoryPresent KO %s\n", IniFile->FileName );
+		//_CONSOLE(LogId, "**ERROR** MemoireFAT_IsDirectoryPresent KO %s\n", IniFile->FileName );
 		return IniFile_StatusKO;
 	}
 
@@ -449,7 +449,7 @@ IniFile_OpenWrite(
 
 		case MemFAT_Error:
 		default:
-			//_CONSOLE( LogId, "**ERROR** MemoireFAT_IsFilePresent KO %s\n", IniFile->FileName );
+			//_CONSOLE(LogId, "**ERROR** MemoireFAT_IsFilePresent KO %s\n", IniFile->FileName );
 			return IniFile_StatusKO;
 	}
 
@@ -470,7 +470,7 @@ IniFile_OpenWrite(
 
 			case MemFAT_Error:
 			default:
-				//_CONSOLE( LogId, "**ERROR** MemoireFAT_IsFilePresent KO %s\n", IniData.pTempName );
+				//_CONSOLE(LogId, "**ERROR** MemoireFAT_IsFilePresent KO %s\n", IniData.pTempName );
 				return IniFile_StatusKO;
 		}
 
@@ -531,7 +531,7 @@ IniFile_OpenWriteFile(
 	// Verif presence repertoire, creation si besoin
 	if (MemoireFAT_IsDirectoryPresent((char*) IniFile->FileName, TRUE) == MemFAT_Error)
 	{
-		_CONSOLE( LogId, "**ERROR** MemoireFAT_IsDirectoryPresent KO %s\n", IniFile->FileName );
+		_CONSOLE(LogId, "**ERROR** MemoireFAT_IsDirectoryPresent KO %s\n", IniFile->FileName );
 		return IniFile_StatusKO;
 	}
 
@@ -560,7 +560,7 @@ IniFile_OpenWriteFile(
 
 		case MemFAT_Error:
 		default:
-			_CONSOLE( LogId, "**ERROR** MemoireFAT_IsFilePresent KO %s\n", IniFile->FileName );
+			_CONSOLE(LogId, "**ERROR** MemoireFAT_IsFilePresent KO %s\n", IniFile->FileName );
 			return IniFile_StatusKO;
 	}
 
@@ -598,7 +598,7 @@ IniFile_OpenWriteTempFile(
 
 			case MemFAT_Error:
 			default:
-				_CONSOLE( LogId, "**ERROR** MemoireFAT_IsFilePresent KO %s\n", IniData.pTempName );
+				_CONSOLE(LogId, "**ERROR** MemoireFAT_IsFilePresent KO %s\n", IniData.pTempName );
 				return IniFile_StatusKO;
 		}
 
@@ -953,7 +953,7 @@ Bool_e  IniFile_IsKeyExist( const char * pSection, const char *pKey )
       break;
 
       default:
-          //_CONSOLE( LogId, "**ERROR** Invalid case (%d)\n", Etape);
+          //_CONSOLE(LogId, "**ERROR** Invalid case (%d)\n", Etape);
         break;
 
       }
@@ -1079,7 +1079,7 @@ char * IniFile_SearchValue( const char * pSection, const char *pKey )
 		break;
 
 	  default:
-		  _CONSOLE( LogId, " **ERROR** Invalid case (%d)\n", Etape);
+		  _CONSOLE(LogId, " **ERROR** Invalid case (%d)\n", Etape);
 		break;
 
 	  }
