@@ -34,10 +34,11 @@
 static Arrosage_t This =
 {
 		.Cfg_Restored				= FALSE,
-		.Cfg_Heure					= "20:00",
+		.Cfg_SaveNeeded				= FALSE,
+		.Cfg_Heure					= "20:30",
 		.Cfg_Intervalle_h			= 0,
 		.Cfg_VolumeParPlant_ml		= 0,
-		.Cfg_NbPlants				= 1,
+		.Cfg_NbPlants				= 2,
 		.Cfg_DebitPompe_ml_par_h	= 12300,
 		.Cfg_VolumeReservoir_ml		= 4500,
 
@@ -56,7 +57,6 @@ static Arrosage_t This =
 void Arrosage_Init(void)
 {
 	Arrosage_t TmpThis;
-	uint32_t Size = sizeof(Arrosage_t);
 
 
 	_CONSOLE(LogId, "---------- ARROSAGE INIT ----------\n");
@@ -123,8 +123,9 @@ void Arrosage_Init(void)
 
 	This.GPIO = PORT_RELAIS_OPT1;
 	This.Etat = Etat_INACTIF;
+	This.Cfg_SaveNeeded = FALSE;
 
-	// Verification de l'arrosage gere toutes les secondes
+	// Verification de l'arrosage gere toutes les 500ms
 	TSW_Start(&This.TmrMngt, 500);
 }
 
@@ -139,7 +140,6 @@ void Arrosage_Management(void)
 	}
 	TSW_ReStart(&This.TmrMngt);
 
-
 	// Arrosage en cours
 	if (TSW_IsRunning(&This.TmrActif) == TRUE)
 	{
@@ -153,6 +153,7 @@ void Arrosage_Management(void)
 		&&	(RTC_GetTimestamp() >= This.TS_Suivant))
 		{
 			Arrosage_Start(This.Cfg_VolumeParPlant_ml);
+			This.Cfg_SaveNeeded = TRUE;
 		}
 	}
 
@@ -162,11 +163,18 @@ void Arrosage_Management(void)
 		_CONSOLE(LogId, "GPIO Arrosage = %d\n", This.Etat);
 		GPIO_Set(This.GPIO, This.Etat);
 	}
+
+	// Sauvegarde si necessaire
+	if (This.Cfg_SaveNeeded == TRUE)
+	{
+		DatabaseEeprom_Write(DatabaseEeprom_Arrosage, &This);
+		This.Cfg_SaveNeeded = FALSE;
+	}
 }
 
 
 /*------------------------------------------------------------------------------------------------*/
-void Arrosage_Start(uint32_t VolumeParPlant_ml)
+uint32_t Arrosage_Start(uint32_t VolumeParPlant_ml)
 {
 	uint32_t Duree_s;
 
@@ -175,7 +183,7 @@ void Arrosage_Start(uint32_t VolumeParPlant_ml)
 	||	(This.Cfg_DebitPompe_ml_par_h == 0))
 	{
 		TSW_Stop(&This.TmrActif);
-		return;
+		return 0;
 	}
 
 	// Calcul de la duree
@@ -211,7 +219,9 @@ void Arrosage_Start(uint32_t VolumeParPlant_ml)
 	// Lancement arrosage
 	TSW_Start(&This.TmrActif, Duree_s * 1000);
 
-	_CONSOLE(LogId, "--- ARROSAGE CONF ---\n");
+	This.Cfg_SaveNeeded = TRUE;
+
+	return Duree_s;
 }
 
 
@@ -229,6 +239,18 @@ void Arrosage_SetVolumeReservoir(uint32_t VolumeReservoirRestant_ml)
 {
 	This.VolumeRestant_ml = VolumeReservoirRestant_ml;
 	//Parametres_Write(&Conf_IniFile,	Conf_ARR_VolumeRestant_ml		,	&This.VolumeRestant_ml		);
+}
+
+
+/*------------------------------------------------------------------------------------------------*/
+Bool_e Arrosage_IsActive(void)
+{
+	if (GPIO_Get(This.GPIO) == Etat_ACTIF)
+	{
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 

@@ -68,8 +68,6 @@ struct telnet_state
 static uint8_t Telnet_NbActiveconnection;
 
 char tstr[1024];
-static char* Telnet_Prompt;
-static char* Telnet_Welcom;
 extern char VERSION_SW[];
 
 
@@ -405,7 +403,7 @@ static err_t telnet_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 	tcp_err(pcb, conn_err);
 	tcp_poll(pcb, telnet_poll, 4);
 
-	usprintf(tstr,"--- %s (AL%s) ---%s", Telnet_Welcom, VERSION_SW, Telnet_Prompt);
+	usprintf(tstr,"--- %s (AL%s) ---\r\n%s", TERMINAL_WELCOM, VERSION_SW, TERMINAL_PROMPT);
 	hs->data_out = tstr;
 	hs->left = strlen(tstr);
 	send_data(pcb, hs);
@@ -417,7 +415,7 @@ static err_t telnet_accept(void *arg, struct tcp_pcb *pcb, err_t err)
 
 
 /*------------------------------------------------------------------------------------------------*/
-void Telnet_Init(char* Prompt, char* Welcom)
+void Telnet_Init()
 {
 	struct tcp_pcb *pcb;
 
@@ -426,8 +424,6 @@ void Telnet_Init(char* Prompt, char* Welcom)
 	pcb = tcp_listen(pcb);
 	tcp_accept(pcb, telnet_accept);
 
-	Telnet_Prompt = Prompt;
-	Telnet_Welcom = Welcom;
 	Telnet_NbActiveconnection = 0;
 }
 

@@ -19,9 +19,10 @@
 	PUBLIC DEFINE
 --------------------------------------------------------------------------------------------------*/
 
+#define TERMINAL_WELCOM			"Welcome to JD TERMINAL"
 #define TERMINAL_PROMPT			"JdTerm>"
 #define TERMINAL_CMD_DELIMITER	' '
-#define TERMINAL_NB_CMD_MAX		20
+#define TERMINAL_NB_CMD_MAX		32
 
 
 /*--------------------------------------------------------------------------------------------------

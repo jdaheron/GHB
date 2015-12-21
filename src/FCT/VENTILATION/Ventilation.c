@@ -80,7 +80,7 @@ void Ventilation_Init(void)
 	{
 		_CONSOLE(LogId, "Check SD cfg\n");
 
-		This.Cfg_SeuilStop_DegC				= ConfIni_Get()->EXT_SeuilStart_DegC;
+		This.Cfg_SeuilStop_DegC				= ConfIni_Get()->EXT_SeuilStop_DegC;
 		This.Cfg_SeuilStart_DegC			= ConfIni_Get()->EXT_SeuilStart_DegC;
 		This.Cfg_TempoApresEXT_s			= ConfIni_Get()->EXT_TempoApresEXT_s;
 		This.Cfg_ActiverPendantChauffage	= ConfIni_Get()->EXT_ActiverPendantCh;

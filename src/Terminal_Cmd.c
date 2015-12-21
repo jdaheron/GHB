@@ -326,6 +326,10 @@ void Cmd_StartupTime(char* bufferIn, pSendResponse_f Terminal_Write)
 void Cmd_Arroser(char* bufferIn, pSendResponse_f Terminal_Write)
 {
 	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
+	uint32_t VolumeParPlant_ml;
+	uint32_t Duree_s;
+	char tmpBuffer[128];
+
 
 	if (NbParam != 2)
 	{
@@ -333,9 +337,11 @@ void Cmd_Arroser(char* bufferIn, pSendResponse_f Terminal_Write)
 		return;
 	}
 
-	uint32_t VolumeParPlant_ml = strtoul(Param[1], NULL ,10);
+	VolumeParPlant_ml = strtoul(Param[1], NULL ,10);
+	Duree_s = Arrosage_Start(VolumeParPlant_ml);
 
-	Arrosage_Start(VolumeParPlant_ml);
+	_sprintf(tmpBuffer, "Duree = %ds\n", Duree_s);
+	Terminal_Write(tmpBuffer);
 }
 
 
@@ -384,7 +390,7 @@ void Cmd_Status(char* bufferIn, pSendResponse_f Terminal_Write)
 
 	memset(day, 0, 10);
 	strncpy(day, RTC_GetDayString(Time.JourSemaine, 3), 3);
-	_sprintf(tmpBuffer, "%s %02d %02d %d %02d %02d %02d %08d %d %d %d %d %f %f",
+	_sprintf(tmpBuffer, "%s %02d %02d %d %02d %02d %02d %08d %d %d %d %d %d.%d %d.%d %f %f",
 			day, Time.Jour, Time.Mois, Time.Annee,
 			Time.Heure, Time.Minute, Time.Seconde,
 			TSW_GetTimestamp_ms(),
@@ -392,6 +398,10 @@ void Cmd_Status(char* bufferIn, pSendResponse_f Terminal_Write)
 			EtatVentillation,
 			EtatChauffage,
 			Arrosage_Get()->Etat,
+			(uint16_t) Temperature,
+			(uint16_t) (Temperature * 10) % 10,
+			(uint16_t) Hygrometrie,
+			(uint16_t) (Hygrometrie * 10) % 10,
 			Temperature,
 			Hygrometrie
 	);
@@ -399,19 +409,136 @@ void Cmd_Status(char* bufferIn, pSendResponse_f Terminal_Write)
 	Terminal_Write(tmpBuffer);
 }
 
-/*------------------------------------------------------------------------------------------------*/
-void Cmd_CfgDefault(char* bufferIn, pSendResponse_f Terminal_Write)
-{
-	char tmpBuffer[256];
 
-	_sprintf(tmpBuffer, "CfgDefault:\nArrosage    = %d\nChauffage   = %d\nEthernet    = %d\nVentilation = %d",
-			Arrosage_Get()->Cfg_Restored,
-			Chauffage_Get()->Cfg_Restored,
-			Ethernet_Get()->Cfg_Restored,
-			Ventilation_Get()->Cfg_Restored
-	);
+/*------------------------------------------------------------------------------------------------*/
+void Cmd_Cfg(char* bufferIn, pSendResponse_f Terminal_Write)
+{
+	uint8_t NbParam = Conv_ParseString(bufferIn, TERMINAL_CMD_DELIMITER, Param);
+	char tmpBuffer[1024];
+	Bool_e IsValide = FALSE;
+	uint32_t Value = 0;
+	char* NextParam = Param[1];
+
+
+	//--------------------------------------------------------------------------------
+	if ((strncmp(NextParam, "get", 3) == 0) && (NbParam == 3))
+	{
+		NextParam = Param[2];
+
+		//------------------------------------------------------------
+		if (strncmp(NextParam, "def", 3) == 0)
+		{
+			_sprintf(tmpBuffer, "CfgDefault:\nArrosage    = %d\nChauffage   = %d\nEthernet    = %d\nVentilation = %d",
+				Arrosage_Get()->Cfg_Restored,
+				Chauffage_Get()->Cfg_Restored,
+				Ethernet_Get()->Cfg_Restored,
+				Ventilation_Get()->Cfg_Restored
+			);
+
+			IsValide = TRUE;
+		}
+
+		//------------------------------------------------------------
+		else if (strncmp(NextParam, "arr", 3) == 0)
+		{
+			_sprintf(tmpBuffer, "Heure               = %s\n",	Arrosage_Get()->Cfg_Heure					);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "Intervalle_h        = %d\n",	Arrosage_Get()->Cfg_Intervalle_h			);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "VolumeParPlant_ml   = %d\n",	Arrosage_Get()->Cfg_VolumeParPlant_ml		);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "NbPlants            = %d\n",	Arrosage_Get()->Cfg_NbPlants				);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "DebitPompe_ml_par_h = %d\n",	Arrosage_Get()->Cfg_DebitPompe_ml_par_h		);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "VolumeReservoir_ml  = %d\n",	Arrosage_Get()->Cfg_VolumeReservoir_ml		);	Terminal_Write(tmpBuffer);
+
+			_sprintf(tmpBuffer, "STATUS:\n");
+			_sprintf(tmpBuffer, "VolumeRestant_ml    = %d\n",	Arrosage_Get()->VolumeRestant_ml			);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "TS_Precedent        = %d\n",	Arrosage_Get()->TS_Precedent				);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "TS_Suivant          = %d\n",	Arrosage_Get()->TS_Suivant					);	Terminal_Write(tmpBuffer);
+
+			_sprintf(tmpBuffer, "\n");
+			IsValide = TRUE;
+		}
+
+		//------------------------------------------------------------
+		else if (strncmp(NextParam, "ch", 2) == 0)
+		{
+			_sprintf(tmpBuffer, "SeuilStart_DegC = %d\n"	,	Chauffage_Get()->Cfg_SeuilStart_DegC	);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "SeuilStop_DegC  = %d\n"	,	Chauffage_Get()->Cfg_SeuilStop_DegC		);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "TempoApresCh_s  = %d\n"	,	Chauffage_Get()->Cfg_TempoApresCh_s		);	Terminal_Write(tmpBuffer);
+
+			_sprintf(tmpBuffer, "\n");
+			IsValide = TRUE;
+		}
+
+		//------------------------------------------------------------
+		else if (strncmp(NextParam, "eth", 3) == 0)
+		{
+			_sprintf(tmpBuffer, "IP_Adresse    = %d.%d.%d.%d\n",		Ethernet_Get()->Cfg_IP_Adresse[0],		Ethernet_Get()->Cfg_IP_Adresse[1],		Ethernet_Get()->Cfg_IP_Adresse[2],		Ethernet_Get()->Cfg_IP_Adresse[3]);                                                                         	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "IP_Masque     = %d.%d.%d.%d\n",		Ethernet_Get()->Cfg_IP_Masque[0],		Ethernet_Get()->Cfg_IP_Masque[1],		Ethernet_Get()->Cfg_IP_Masque[2],		Ethernet_Get()->Cfg_IP_Masque[3]);                                                                          	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "IP_Passerelle = %d.%d.%d.%d\n", 		Ethernet_Get()->Cfg_IP_Passerelle[0],	Ethernet_Get()->Cfg_IP_Passerelle[1],	Ethernet_Get()->Cfg_IP_Passerelle[2],	Ethernet_Get()->Cfg_IP_Passerelle[3]);                                                                      	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "MAC_Adresse   = %d:%d:%d:%d:%d:%d\n",	Ethernet_Get()->Cfg_MAC_Adresse[0],		Ethernet_Get()->Cfg_MAC_Adresse[1],		Ethernet_Get()->Cfg_MAC_Adresse[2],		Ethernet_Get()->Cfg_MAC_Adresse[3], Ethernet_Get()->Cfg_MAC_Adresse[4], Ethernet_Get()->Cfg_MAC_Adresse[5]);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "DHCP_Actif    = %d\n",					Ethernet_Get()->Cfg_DHCP_Actif		); Terminal_Write(tmpBuffer);
+
+			_sprintf(tmpBuffer, "\n");
+			IsValide = TRUE;
+		}
+
+		//------------------------------------------------------------
+		else if (strncmp(NextParam, "ext", 3) == 0)
+		{
+			_sprintf(tmpBuffer, "SeuilStop_DegC    = %d\n",	Ventilation_Get()->Cfg_SeuilStop_DegC			);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "SeuilStart_DegC   = %d\n",	Ventilation_Get()->Cfg_SeuilStart_DegC			);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "TempoApresEXT_s   = %d\n",	Ventilation_Get()->Cfg_TempoApresEXT_s			);	Terminal_Write(tmpBuffer);
+			_sprintf(tmpBuffer, "ActiverPendantCh. = %d\n",	Ventilation_Get()->Cfg_ActiverPendantChauffage	);	Terminal_Write(tmpBuffer);
+
+			_sprintf(tmpBuffer, "\n");
+			IsValide = TRUE;
+		}
+	}
+	//--------------------------------------------------------------------------------
+	else if ((strncmp(NextParam, "set", 3) == 0) && (NbParam == 5))
+	{
+		NextParam = Param[2];
+
+		//------------------------------------------------------------
+		if (strncmp(NextParam, "arr", 3) == 0)
+		{
+			NextParam = Param[3];
+
+			if (strncmp(NextParam, "Intervalle", 10) == 0)
+			{
+				Value = strtoul(Param[4], NULL ,10);
+				Arrosage_Get()->Cfg_Intervalle_h = Value;
+				Arrosage_Get()->Cfg_SaveNeeded	= TRUE;
+				_sprintf(tmpBuffer, "\n");
+				IsValide = TRUE;
+			}
+			else if (strncmp(NextParam, "Volume", 6) == 0)
+			{
+				Value = strtoul(Param[4], NULL ,10);
+				Arrosage_Get()->Cfg_VolumeParPlant_ml = Value;
+				Arrosage_Get()->Cfg_SaveNeeded	= TRUE;
+				_sprintf(tmpBuffer, "\n");
+				IsValide = TRUE;
+			}
+			else if (strncmp(NextParam, "NbPlants", 8) == 0)
+			{
+				Value = strtoul(Param[4], NULL ,10);
+				Arrosage_Get()->Cfg_NbPlants	= Value;
+				Arrosage_Get()->Cfg_SaveNeeded	= TRUE;
+				_sprintf(tmpBuffer, "\n");
+				IsValide = TRUE;
+			}
+		}
+	}
+
+
+	if (IsValide == FALSE)
+	{
+		Terminal_Write("rtc WRONG PARAM\n");
+		return;
+	}
 
 	Terminal_Write(tmpBuffer);
+
 }
 
 
@@ -432,7 +559,7 @@ void Terminal_Cmd_Init(void)
 	Terminal_RegisterCommand("arroser",		Cmd_Arroser,		"Lancement d'un arrosage immédiat");
 	Terminal_RegisterCommand("reservoir",	Cmd_Reservoir,		"Ecriture de l'etat du remplissage du reservoir");
 	Terminal_RegisterCommand("status",		Cmd_Status,			"Lecture de l'etat de la carte");
-	Terminal_RegisterCommand("cfgdef",		Cmd_CfgDefault,		"Flag conf par defaut");
+	Terminal_RegisterCommand("cfg",			Cmd_Cfg,			"Gestion de la conf");
 }
 
 

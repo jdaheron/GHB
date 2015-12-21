@@ -552,9 +552,9 @@ static const MappingGpio_s MappingGpio[] = {
 /* PORT_CONSOLE_RX			*/	{	GPIOA,	 10	,	FALSE	,	GPIO_Mode_AF,	GPIO_AF_USART1,	GPIO_Speed_50MHz,	NULL,			GPIO_PuPd_UP		, NULL			, (uint32_t) USART1	, NULL				},
 
 /* PORT_LED_LB				*/	{	GPIOA,	15	,	TRUE	,	GPIO_Mode_OUT,	NULL,			GPIO_Speed_2MHz,	GPIO_OType_PP,	GPIO_PuPd_NOPULL	, Etat_INACTIF	, NULL				, NULL				},
-/* PORT_IHM_LED1			*/	{	GPIOE,	 4	,	TRUE	,	GPIO_Mode_OUT,	NULL,			GPIO_Speed_2MHz,	GPIO_OType_PP,	GPIO_PuPd_NOPULL	, Etat_INACTIF	, NULL				, NULL				},
+/* PORT_IHM_LED1 ->	LED3	*/	{	GPIOE,	 6	,	TRUE	,	GPIO_Mode_OUT,	NULL,			GPIO_Speed_2MHz,	GPIO_OType_PP,	GPIO_PuPd_NOPULL	, Etat_INACTIF	, NULL				, NULL				},
 /* PORT_IHM_LED2			*/	{	GPIOE,	 5	,	TRUE	,	GPIO_Mode_OUT,	NULL,			GPIO_Speed_2MHz,	GPIO_OType_PP,	GPIO_PuPd_NOPULL	, Etat_INACTIF	, NULL				, NULL				},
-/* PORT_IHM_LED3			*/	{	GPIOE,	 6	,	TRUE	,	GPIO_Mode_OUT,	NULL,			GPIO_Speed_2MHz,	GPIO_OType_PP,	GPIO_PuPd_NOPULL	, Etat_INACTIF	, NULL				, NULL				},
+/* PORT_IHM_LED3 ->	LED1	*/	{	GPIOE,	 4	,	TRUE	,	GPIO_Mode_OUT,	NULL,			GPIO_Speed_2MHz,	GPIO_OType_PP,	GPIO_PuPd_NOPULL	, Etat_INACTIF	, NULL				, NULL				},
 
 /* PORT_RELAIS_L			*/	{	GPIOC,	 3	,	FALSE	,	GPIO_Mode_OUT,	NULL,			GPIO_Speed_2MHz,	GPIO_OType_PP,	GPIO_PuPd_NOPULL	, Etat_INACTIF	, NULL				, NULL				},
 /* PORT_RELAIS_CH			*/	{	GPIOA,	 6	,	FALSE	,	GPIO_Mode_OUT,	NULL,			GPIO_Speed_2MHz,	GPIO_OType_PP,	GPIO_PuPd_NOPULL	, Etat_INACTIF	, NULL				, NULL				},

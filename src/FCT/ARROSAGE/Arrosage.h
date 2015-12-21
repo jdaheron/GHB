@@ -28,6 +28,7 @@
 typedef struct
 {
 	Bool_e 			Cfg_Restored;
+	Bool_e 			Cfg_SaveNeeded;
 	char			Cfg_Heure[8];
 	uint32_t		Cfg_Intervalle_h;
 	uint32_t		Cfg_VolumeParPlant_ml;
@@ -54,9 +55,10 @@ typedef struct
 
 void 		Arrosage_Init(void);
 void		Arrosage_Management(void);
-void		Arrosage_Start(uint32_t VolumeParPlant_ml);
+uint32_t	Arrosage_Start(uint32_t VolumeParPlant_ml);
 void		Arrosage_Stop(void);
 void		Arrosage_SetVolumeReservoir(uint32_t VolumeReservoirRestant_ml);
+Bool_e		Arrosage_IsActive(void);
 Arrosage_t*	Arrosage_Get(void);
 
 

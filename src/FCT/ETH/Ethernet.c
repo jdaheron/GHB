@@ -78,7 +78,7 @@ void Ethernet_Init(void)
 		_CONSOLE(LogId, "Invalid Eeprom Read: Default restored\n");
 		DatabaseEeprom_Write(DatabaseEeprom_Ethernet, &This);
 		memcpy(&TmpThis, &This, sizeof(Ethernet_t));
-		This.Cfg_Restored = TRUE;
+		This.Cfg_Restored 	= TRUE;
 	}
 	else
 	{
@@ -130,7 +130,7 @@ void Ethernet_Init(void)
 	LwIP_Init(This.Cfg_IP_Adresse, This.Cfg_IP_Masque, This.Cfg_IP_Passerelle, This.Cfg_DHCP_Actif, This.Cfg_MAC_Adresse);		// Initilaize the LwIP stack
 	tftpd_init();		// TFTP server Init
 	//httpd_init();		// Http webserver Init
-	Telnet_Init(TELNET_PROMPT, TELNET_WELCOM);
+	Telnet_Init();
 }
 
 

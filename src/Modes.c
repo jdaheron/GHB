@@ -22,6 +22,8 @@
 	PRIVATE DEFINE
 --------------------------------------------------------------------------------------------------*/
 
+#define ACTIVER_IO	0
+
 
 /*--------------------------------------------------------------------------------------------------
 	PRIVATE TYPEDEF
@@ -38,7 +40,27 @@ extern Etat_e	EtatChauffage;
 extern Mode_e	Mode;
 extern float	Temperature;
 extern float	Hygrometrie;
+extern char VERSION_SW[];
 
+
+/*------------------------------------------------------------------------------------------------*/
+void Version_GPIO_Set(Etat_e Etat)
+{
+	uint8_t val;
+	MappingGpio_e gpio = PORT_IHM_LED1;
+
+	val = strlen(VERSION_SW);
+	val = VERSION_SW[val-1];
+
+	switch (val % 3)
+	{
+		case 0 : gpio = PORT_IHM_LED1;	break;
+		case 1 : gpio = PORT_IHM_LED2;	break;
+		case 2 : gpio = PORT_IHM_LED3;	break;
+	}
+
+	GPIO_Set(gpio, Etat);
+}
 
 /*------------------------------------------------------------------------------------------------*/
 Status_e Mode_Demarrage(void)
@@ -52,11 +74,13 @@ Status_e Mode_Demarrage(void)
 		// Start timer
 		case 0 :
 
-			//TSW_Start(&Tmr_START, 1000 * START_Tempo_s);
+			Version_GPIO_Set(Etat_ACTIF);
 
-			EtatVentillation	= Etat_INACTIF;
-			EtatChauffage		= Etat_INACTIF;
-			GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
+			#if ACTIVER_IO
+				EtatVentillation	= Etat_INACTIF;
+				EtatChauffage		= Etat_INACTIF;
+				GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
+			#endif
 
 			Etape++;
 			break;
@@ -65,9 +89,11 @@ Status_e Mode_Demarrage(void)
 		// Test Ventillation
 		case 1 :
 
-			EtatVentillation	= Etat_ACTIF;
-			EtatChauffage		= Etat_INACTIF;
-			GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
+			#if ACTIVER_IO
+				EtatVentillation	= Etat_ACTIF;
+				EtatChauffage		= Etat_INACTIF;
+				GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
+			#endif
 
 			TSW_Start(&Tmr_START, 5000);
 
@@ -82,9 +108,11 @@ Status_e Mode_Demarrage(void)
 				break;
 			}
 
-			EtatVentillation	= Etat_INACTIF;
-			EtatChauffage		= Etat_ACTIF;
-			GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
+			#if ACTIVER_IO
+				EtatVentillation	= Etat_INACTIF;
+				EtatChauffage		= Etat_ACTIF;
+				GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
+			#endif
 
 			TSW_Start(&Tmr_START, 5000);
 
@@ -98,9 +126,11 @@ Status_e Mode_Demarrage(void)
 				break;
 			}
 
-			EtatVentillation	= Etat_INACTIF;
-			EtatChauffage		= Etat_INACTIF;
-			GPIO_Set(Arrosage_Get()->GPIO, Etat_ACTIF);
+			#if ACTIVER_IO
+				EtatVentillation	= Etat_INACTIF;
+				EtatChauffage		= Etat_INACTIF;
+				GPIO_Set(Arrosage_Get()->GPIO, Etat_ACTIF);
+			#endif
 
 			TSW_Start(&Tmr_START, 5000);
 
@@ -114,11 +144,14 @@ Status_e Mode_Demarrage(void)
 				break;
 			}
 
-			EtatVentillation	= Etat_INACTIF;
-			EtatChauffage		= Etat_INACTIF;
-			GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
+			#if ACTIVER_IO
+				EtatVentillation	= Etat_INACTIF;
+				EtatChauffage		= Etat_INACTIF;
+				GPIO_Set(Arrosage_Get()->GPIO, Etat_INACTIF);
+			#endif
 
 			TSW_Start(&Tmr_START, 10000);
+			Version_GPIO_Set(Etat_INACTIF);
 
 			Etape++;
 			break;

@@ -29,7 +29,7 @@
 	PUBLIC FUNCTION PROTOTYPE
 --------------------------------------------------------------------------------------------------*/
 
-void 	Telnet_Init(char* Prompt, char* Welcom);
+void 	Telnet_Init();
 uint8_t	Telnet_GetNbActiveConnection(void);
 
 

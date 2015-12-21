@@ -66,16 +66,20 @@ void Logs_Data(void)
 	// Mode, Temperature
 	if (TempHygro_IsValide() == FALSE)
 	{
-		_sprintf(LogBuffer, "%d;%d;%d;%d;%.01f;%.01f;",
+		_sprintf(LogBuffer, "%d;%d;%d;%d;%d,%d;%;%d,%d;",
 				Mode, EtatVentillation, EtatChauffage, Arrosage_Get()->Etat,
-				-100, -100
+				-100, 0,
+				-100, 0
 		);
 	}
 	else
 	{
-		_sprintf(LogBuffer, "%d;%d;%d;%d;%.01f;%.01f;",
+		_sprintf(LogBuffer, "%d;%d;%d;%d;%d,%d;%;%d,%d;",
 				Mode, EtatVentillation, EtatChauffage, Arrosage_Get()->Etat,
-				Temperature, Hygrometrie
+				(uint16_t) Temperature,
+				(uint16_t) (Temperature * 10) % 10,
+				(uint16_t) Hygrometrie,
+				(uint16_t) (Hygrometrie * 10) % 10
 		);
 	}
 

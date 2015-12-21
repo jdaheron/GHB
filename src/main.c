@@ -23,7 +23,7 @@
 #include "util_TSW.h"
 #include "util_printf.h"
 #include "util_Goto.h"
-
+#include "util_CONSOLE.h"
 
 #include <FILES/fct_MemoireFAT.h>
 #include <FILES/FatFs/drivers/drv_SdCard_SPI.h>
@@ -33,7 +33,7 @@
 #include "Ethernet.h"
 #include "Ventilation.h"
 
-
+#include "Telnet.h"
 #include "Terminal.h"
 #include "Terminal_Cmd.h"
 #include "if_PC.h"
@@ -46,7 +46,7 @@
 	EXPORTED VARIABLES
 --------------------------------------------------------------------------------------------------*/
 
-const char VERSION_SW[] = {"00001AAI"};
+const char VERSION_SW[] = {"00001AAJ"};
 
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
@@ -63,11 +63,11 @@ const char VERSION_SW[] = {"00001AAI"};
 
 #define LogId								"MAIN"
 
-#define REBOOT_ON_DEFAULT_MODE				FALSE
+#define REBOOT_ON_DEFAULT_MODE				TRUE
 #define MAIN_CONSOLE_ENABLE					1
 #define USE_ETHERNET_AND_USB				1
 #define USE_TEMP_HYGRO						1
-#define TEMPERATURE_PERIODE_ACQUISITION_ms	2500
+#define TEMPERATURE_PERIODE_ACQUISITION_ms	5000
 #define REGLAGE_RTC()						//RTC_ReglerDateHeure(LUNDI, 19, 10, 2015, 22, 15, 0, TRUE)
 
 
@@ -100,8 +100,8 @@ Etat_e		EtatVentillation = Etat_INACTIF;
 Etat_e		EtatChauffage = Etat_INACTIF;
 float		Temperature = 0;
 float		Hygrometrie = 0;
-static char BufferIn[512];
-static char BufferOut[1024];
+//static char BufferIn[512];
+//static char BufferOut[1024];
 Horodatage_s StartTime;
 
 
@@ -151,9 +151,8 @@ int main(void)
 	I2C1_Init(100 * 1000);						// 100kHz
 	ADC1_Init();
 
-	_CONSOLE(LogId, "\n--- START - ALJ");
-	_CONSOLE(LogId, VERSION_SW);
-	_CONSOLE(LogId, " ---\n");
+	_CONSOLE(0, "\n");
+	_CONSOLE(LogId, "--- START - ALJ%s ---\n", VERSION_SW);
 
 	REGLAGE_RTC();
 
@@ -333,6 +332,10 @@ int main(void)
 					_CONSOLE(LogId, "----- MODE_SURVEILLANCE -----\n");
 					Logs_Data();
 
+					GPIO_Set(PORT_IHM_LED1, Etat_ACTIF);
+					GPIO_Set(PORT_IHM_LED2, Etat_INACTIF);
+					GPIO_Set(PORT_IHM_LED3, Etat_INACTIF);
+
 					EtatVentillation = Etat_INACTIF;
 					EtatChauffage = Etat_INACTIF;
 				}
@@ -364,6 +367,10 @@ int main(void)
 					_CONSOLE(LogId, "----- MODE_CHAUFFAGE -----\n");
 					Logs_Data();
 
+					GPIO_Set(PORT_IHM_LED1, Etat_INACTIF);
+					GPIO_Set(PORT_IHM_LED2, Etat_ACTIF);
+					GPIO_Set(PORT_IHM_LED3, Etat_INACTIF);
+
 					if (Ventilation_Get()->Cfg_ActiverPendantChauffage)
 						EtatVentillation = Etat_ACTIF;
 					else
@@ -390,6 +397,10 @@ int main(void)
 					_CONSOLE(LogId, "----- MODE_VENTILLATION -----\n");
 					Logs_Data();
 
+					GPIO_Set(PORT_IHM_LED1, Etat_ACTIF);
+					GPIO_Set(PORT_IHM_LED2, Etat_ACTIF);
+					GPIO_Set(PORT_IHM_LED3, Etat_INACTIF);
+
 					EtatChauffage = Etat_INACTIF;
 					EtatVentillation = Etat_ACTIF;
 				}
@@ -412,16 +423,22 @@ int main(void)
 					_CONSOLE(LogId, "----- MODE_DEFAUT -----\n");
 					Logs_Data();
 
+					GPIO_Set(PORT_IHM_LED1, Etat_INACTIF);
+					GPIO_Set(PORT_IHM_LED2, Etat_INACTIF);
+					GPIO_Set(PORT_IHM_LED3, Etat_ACTIF);
+
 					EtatVentillation 	= Etat_INACTIF;
 					EtatChauffage		= Etat_INACTIF;
-					Arrosage_Stop();
+					//Arrosage_Stop();
 
 					TSW_Start(&Tmr_DEFAULT, 60000);
 				}
 
 				if (TSW_IsRunning(&Tmr_DEFAULT) == FALSE)
 				{
-					if (REBOOT_ON_DEFAULT_MODE == TRUE)
+					if ((Telnet_GetNbActiveConnection() == 0)
+					&&	(REBOOT_ON_DEFAULT_MODE == TRUE)
+					&&	(Arrosage_IsActive() == FALSE))
 					{
 						_CONSOLE(LogId, "REBOOT...\n");
 						TSW_Delay(5000);

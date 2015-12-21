@@ -13,6 +13,7 @@
 
 #include <FILES/fct_MemoireFAT.h>
 #include "util_TSW.h"
+#include "util_CONSOLE.h"
 
 
 /* External Variables *****************************************************************************/
@@ -52,6 +53,8 @@ typedef struct{
  * @{
  */
  
+#define LogId	"MEMOIRE"
+
 /**
  * @}
  */ 
@@ -62,14 +65,6 @@ typedef struct{
  * @defgroup Private_Macros Private Macros
  * @{
  */
-  
-#define MEMOIRE_CONSOLE_ENABLE	1
-
-#if MEMOIRE_CONSOLE_ENABLE
-	#define _MEMOIRE_CONSOLE	_printf
-#else
-	#define _MEMOIRE_CONSOLE	//
-#endif
 
 /**
  * @}
@@ -221,7 +216,7 @@ MemoireFAT_Init(
 					break;
 
 				case FR_NO_FILESYSTEM:
-					_MEMOIRE_CONSOLE("[Memoire] Creation du FS\n");
+					_CONSOLE(LogId, "Creation du FS\n");
 					Memoire.DiskDriver->disk_ioctl(GET_SECTOR_SIZE, &block_size);
 					FRes = f_mkfs(Memoire.DrivePath, 0, block_size);
 					break;
@@ -251,7 +246,7 @@ MemoireFAT_Init(
 
 	if (FRes == FR_OK){
 
-		_MEMOIRE_CONSOLE("[Memoire] FS OK\n");
+		_CONSOLE(LogId, "FS OK\n");
 		Memoire.InitOk = TRUE;
 		IsFirstTry = FALSE;
 	}
@@ -259,7 +254,7 @@ MemoireFAT_Init(
 	{
 		if (IsFirstTry == TRUE)
 		{
-			_MEMOIRE_CONSOLE("[Memoire] FS ERROR\n");
+			_CONSOLE(LogId, "FS ERROR\n");
 		}
 		MemoireFAT_DeInit();
 		IsFirstTry = FALSE;
@@ -365,7 +360,7 @@ MemoireFAT_Erase(
 	if (MemoireFAT_IsReady() == FALSE)
 		return FR_DENIED;
 
-	_MEMOIRE_CONSOLE("[Memoire] Erase\n");
+	_CONSOLE(LogId, "Erase\n");
 
 	Memoire.DiskDriver->disk_ioctl(GET_SECTOR_SIZE, &block_size);
 	if (block_size > 1024)
@@ -504,12 +499,12 @@ void MemoireFAT_PrintOpenedFile(
 	SaveCursor = f_tell(pFile);
 	f_lseek(pFile, 0);
 
-	_MEMOIRE_CONSOLE("--- FILE ---\n");
+	_CONSOLE(LogId, "--- FILE ---\n");
 
 	while (f_gets(Buffer, 256, pFile))
-		_MEMOIRE_CONSOLE("%s", Buffer);
+		_CONSOLE(LogId, "%s", Buffer);
 
-	_MEMOIRE_CONSOLE("--- END OF FILE ---\n");
+	_CONSOLE(LogId, "--- END OF FILE ---\n");
 
 	f_lseek(pFile, SaveCursor);
 }
@@ -528,17 +523,17 @@ void MemoireFAT_PrintFile(
 
 	if (f_open(&File, FileName, FA_READ) == FR_OK)
 	{
-		_MEMOIRE_CONSOLE("--- FILE : \"%s\" ---\n", FileName);
+		_CONSOLE(LogId, "--- FILE : \"%s\" ---\n", FileName);
 
 		while (f_gets(Buffer, 256, &File))
-			_MEMOIRE_CONSOLE("%s", Buffer);
+			_CONSOLE(LogId, "%s", Buffer);
 
-		_MEMOIRE_CONSOLE("--- END OF FILE ---\n");
+		_CONSOLE(LogId, "--- END OF FILE ---\n");
 
 		f_close(&File);
 	}
 	else
-		_MEMOIRE_CONSOLE("--- FILE ERROR---\n");
+		_CONSOLE(LogId, "--- FILE ERROR---\n");
 }
 
 /**
@@ -746,7 +741,7 @@ MemoireFAT_IsDirectoryPresent(
 			if (res != FR_NO_PATH)
 				return MemFAT_Error;
 
-			_MEMOIRE_CONSOLE("Creation repertoire \"%s\"\n", buffer);
+			_CONSOLE(LogId, "Creation repertoire \"%s\"\n", buffer);
 			if (f_mkdir(buffer) != FR_OK)
 				return MemFAT_Error;
 		}
@@ -788,7 +783,7 @@ MemoireFAT_IsFilePresent(
 	{
 		if (f_open(pFile, FileName, ModeAcces | FA_WRITE | FA_CREATE_ALWAYS) == FR_OK)
 		{
-			_MEMOIRE_CONSOLE("Creation Fichier \"%s\"\n", FileName);
+			_CONSOLE(LogId, "Creation Fichier \"%s\"\n", FileName);
 			if (KeepOpened == FALSE)
 				f_close(pFile);
 			return MemFAT_FileCreated;
