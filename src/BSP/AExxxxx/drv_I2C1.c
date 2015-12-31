@@ -57,6 +57,7 @@ void I2C1_Init(uint32_t ClockSpeed)
 	};
 
 	// Activation horloges
+	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, ENABLE);
 	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, DISABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 

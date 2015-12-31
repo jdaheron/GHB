@@ -64,7 +64,7 @@ static Ethernet_t This =
 void Ethernet_Init(void)
 {
 	Ethernet_t TmpThis;
-	uint32_t Size = sizeof(Ethernet_t);
+	Status_e ReadStatus;
 
 
 	_CONSOLE(LogId, "---------- CONF_ETHERNET INIT ----------\n");
@@ -73,7 +73,9 @@ void Ethernet_Init(void)
 	// Lecture des donnees flash
 	//------------------------------------------------------
 	DatabaseEeprom_InitData(DatabaseEeprom_Ethernet, NULL, sizeof(Ethernet_t));
-	if (DatabaseEeprom_Read(DatabaseEeprom_Ethernet, &TmpThis) == Status_KO)
+	ReadStatus = DatabaseEeprom_Read(DatabaseEeprom_Ethernet, &TmpThis);
+	DatabaseEeprom_Display(DatabaseEeprom_Ethernet, &TmpThis);
+	if (ReadStatus == Status_KO)
 	{
 		_CONSOLE(LogId, "Invalid Eeprom Read: Default restored\n");
 		DatabaseEeprom_Write(DatabaseEeprom_Ethernet, &This);

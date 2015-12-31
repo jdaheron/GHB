@@ -57,7 +57,7 @@
 #define Write(a, b, c)	CAT24AA16_Write(a, b, c)
 #define ALIGN_PAGE(a)	CAT24AA16_PAGE_SIZE * (1 + ((2+a) / CAT24AA16_PAGE_SIZE))
 
-#define LogId			-1//"DB_EEPROM"
+#define LogId			"DB_EEPROM"
 
 /**
  * @}
@@ -137,7 +137,10 @@ static Bool_e IsValide(DatabaseEeprom_s* pDB)
 	// Verification Checksum
 	Checksum_calcule = (uint8_t) Checksum_CalculComplementA2((uint8_t*) pDB->pData, pDB->Size);
 	if (pDB->Checksum != Checksum_calcule)
+	{
+		_CONSOLE(LogId, "Checksum error\n");
 		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -235,7 +238,7 @@ DatabaseEeprom_Read(
 
 	//--------------------------------------
 	// Lecture des donnees
-	_CONSOLE(LogId, "---DatabaseEeprom_Read---\n");
+	_CONSOLE(LogId, "DatabaseEeprom_Read\n");
 
 	// Lecture et verification Data0
 	ReadData(pDB->StartAddress, pDB);
@@ -340,7 +343,7 @@ DatabaseEeprom_Write(
 	//--------------------------------------
 	// Ecriture des donnees
 
-	_CONSOLE(LogId, "---DatabaseEeprom_Write---\n");
+	_CONSOLE(LogId, "DatabaseEeprom_Write\n");
 
 	// Incrementation du numero de sauvegarde
 	pDB->Num++;
@@ -361,6 +364,36 @@ DatabaseEeprom_Write(
 	return Status_OK;
 }
 
+
+void DatabaseEeprom_Display(DatabaseEeprom_Data_e DatabaseEeprom_Data, void* pData)
+{
+	DatabaseEeprom_s* pDB;
+	uint8_t* pTxData;
+
+
+	if (DatabaseEeprom_Data >= NB_DatabaseEeprom)
+	{
+		return;
+	}
+
+	//--------------------------------------
+	// Preparation
+	pDB = &DatabaseEeprom[DatabaseEeprom_Data];
+	pDB->pData = pData;
+	pTxData = (uint8_t*) pDB->pData;
+
+	_CONSOLE(LogId, "StartAddress = 0x%04X\n",	pDB->StartAddress	);
+	_CONSOLE(LogId, "Size         = %d\n",		pDB->Size			);
+	_CONSOLE(LogId, "Num          = %d\n",		pDB->Num			);
+	_CONSOLE(LogId, "Checksum     = 0x%02X\n",	pDB->Checksum		);
+	_CONSOLE(LogId, "Data         = %02X ",		pTxData[0]			);
+
+	for (int i=1; i<pDB->Size; i++)
+	{
+		_CONSOLE(NULL, "%02X ",  pTxData[i]);
+	}
+	_CONSOLE(NULL, "\n");
+}
 
 
 

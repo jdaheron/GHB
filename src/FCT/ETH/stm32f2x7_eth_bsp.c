@@ -121,7 +121,7 @@ void ETH_BSP_Config(void)
 	// read the ID for match
 	for (PhyAddr = 1; 32 >= PhyAddr; PhyAddr++)
 	{
-		reg2 = ETH_ReadPHYRegister(PhyAddr,2);
+		reg2 = ETH_ReadPHYRegister(PhyAddr,2);	//PHY_MICR_INT_EN ?
 		reg3 = ETH_ReadPHYRegister(PhyAddr,3);
 
 		if ((reg2 == 0x0022) && (reg3 == 0x1609))

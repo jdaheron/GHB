@@ -13,6 +13,7 @@
 #include "ConfIni.h"
 #include "fct_DatabaseEeprom.h"
 #include "util_CONSOLE.h"
+#include "Logs.h"
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -57,6 +58,7 @@ static Arrosage_t This =
 void Arrosage_Init(void)
 {
 	Arrosage_t TmpThis;
+	Status_e ReadStatus;
 
 
 	_CONSOLE(LogId, "---------- ARROSAGE INIT ----------\n");
@@ -65,7 +67,9 @@ void Arrosage_Init(void)
 	// Lecture des donnees flash
 	//------------------------------------------------------
 	DatabaseEeprom_InitData(DatabaseEeprom_Arrosage, NULL, sizeof(Arrosage_t));
-	if (DatabaseEeprom_Read(DatabaseEeprom_Arrosage, &TmpThis) == Status_KO)
+	ReadStatus = DatabaseEeprom_Read(DatabaseEeprom_Arrosage, &TmpThis);
+	DatabaseEeprom_Display(DatabaseEeprom_Arrosage, &TmpThis);
+	if (ReadStatus == Status_KO)
 	{
 		_CONSOLE(LogId, "Invalid Eeprom Read: Default restored\n");
 		DatabaseEeprom_Write(DatabaseEeprom_Arrosage, &This);
@@ -129,6 +133,29 @@ void Arrosage_Init(void)
 	TSW_Start(&This.TmrMngt, 500);
 }
 
+/*------------------------------------------------------------------------------------------------*/
+void Arrosage_LaunchDbg(void)
+{
+	Horodatage_s Time;
+
+
+	RTC_Lire(&Time);
+
+	if (	((Time.Mois == JANVIER) && (Time.Jour == 31))
+		||	((Time.Mois == FEVRIER) && (Time.Jour ==  4))
+		||	((Time.Mois == FEVRIER) && (Time.Jour ==  8))
+		||	((Time.Mois == FEVRIER) && (Time.Jour == 12))
+		||	((Time.Mois == FEVRIER) && (Time.Jour == 16))
+		||	((Time.Mois == FEVRIER) && (Time.Jour == 20))	)
+	{
+		if ((Time.Heure == 9)
+		&&	(Time.Minute < 10))
+		{
+			This.Cfg_NbPlants = 2;
+			Arrosage_Start(1100);
+		}
+	}
+}
 
 /*------------------------------------------------------------------------------------------------*/
 void Arrosage_Management(void)
@@ -140,6 +167,7 @@ void Arrosage_Management(void)
 	}
 	TSW_ReStart(&This.TmrMngt);
 
+
 	// Arrosage en cours
 	if (TSW_IsRunning(&This.TmrActif) == TRUE)
 	{
@@ -147,6 +175,8 @@ void Arrosage_Management(void)
 	}
 	else
 	{
+		Arrosage_LaunchDbg();
+
 		This.Etat = Etat_INACTIF;
 
 		if ((This.Cfg_Intervalle_h > 0)
@@ -162,6 +192,7 @@ void Arrosage_Management(void)
 	{
 		_CONSOLE(LogId, "GPIO Arrosage = %d\n", This.Etat);
 		GPIO_Set(This.GPIO, This.Etat);
+		Logs_Data();
 	}
 
 	// Sauvegarde si necessaire

@@ -140,7 +140,10 @@ DatabaseEeprom_Write(
 		DatabaseEeprom_Data_e	DatabaseEeprom_Data,	/**<[in] Index de la donnees dans la base.*/
 		void*					pData					/**<[out] Pointeur vers les donnees a ecrire.*/
 );
-	 
+
+
+void DatabaseEeprom_Display(DatabaseEeprom_Data_e DatabaseEeprom_Data, void* pData);
+
  /**
  * @}
  */ 

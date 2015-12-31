@@ -50,7 +50,7 @@ static Ventilation_t This =
 void Ventilation_Init(void)
 {
 	Ventilation_t TmpThis;
-	uint32_t Size = sizeof(Ventilation_t);
+	Status_e ReadStatus;
 
 
 	_CONSOLE(LogId, "---------- VENTILATION INIT ----------\n");
@@ -58,7 +58,9 @@ void Ventilation_Init(void)
 	//----------------------------------------------------------
 	// Initialisation des donnees
 	DatabaseEeprom_InitData(DatabaseEeprom_Ventilation, NULL, sizeof(Ventilation_t));
-	if (DatabaseEeprom_Read(DatabaseEeprom_Ventilation, &TmpThis) == Status_KO)
+	ReadStatus = DatabaseEeprom_Read(DatabaseEeprom_Ventilation, &TmpThis);
+	DatabaseEeprom_Display(DatabaseEeprom_Ventilation, &TmpThis);
+	if (ReadStatus == Status_KO)
 	{
 		_CONSOLE(LogId, "Invalid Eeprom Read: Default restored\n");
 		DatabaseEeprom_Write(DatabaseEeprom_Ventilation, &This);

@@ -21,6 +21,7 @@
 
 
 Bool_e AM23xx_Read(int16_t* pTemp, uint16_t* pHumid);
+void AM23xx_Test(void);
 
 
 #endif /* EQU_AM23xx_H_ */

@@ -49,7 +49,7 @@ static Chauffage_t This =
 void Chauffage_Init(void)
 {
 	Chauffage_t TmpThis;
-	uint32_t Size = sizeof(Chauffage_t);
+	Status_e ReadStatus;
 
 
 	_CONSOLE(LogId, "---------- CHAUFFAGE INIT ----------\n");
@@ -58,7 +58,9 @@ void Chauffage_Init(void)
 	// Lecture des donnees flash
 	//------------------------------------------------------
 	DatabaseEeprom_InitData(DatabaseEeprom_Chauffage, NULL, sizeof(Chauffage_t));
-	if (DatabaseEeprom_Read(DatabaseEeprom_Chauffage, &TmpThis) == Status_KO)
+	ReadStatus = DatabaseEeprom_Read(DatabaseEeprom_Chauffage, &TmpThis);
+	DatabaseEeprom_Display(DatabaseEeprom_Chauffage, &TmpThis);
+	if (ReadStatus == Status_KO)
 	{
 		_CONSOLE(LogId, "Invalid Eeprom Read: Default restored\n");
 		DatabaseEeprom_Write(DatabaseEeprom_Chauffage, &This);

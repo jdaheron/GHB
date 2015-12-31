@@ -46,7 +46,7 @@
 	EXPORTED VARIABLES
 --------------------------------------------------------------------------------------------------*/
 
-const char VERSION_SW[] = {"00001AAJ"};
+const char VERSION_SW[] = {"00001AAK"};
 
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
@@ -94,8 +94,10 @@ static ModeFct_e	ModeFct = MODE_FCT_SERVEUR;
 static TSW_s		TmrAffichTempHygro;
 static TSW_s		Tmr_CH;
 static TSW_s		Tmr_EXT;
+static TSW_s		Tmr_ATTENTE;
 static TSW_s		Tmr_RTC;
 static TSW_s 		Tmr_DEFAULT;
+static TSW_s 		Tmr_DEFAULT_Max;
 Etat_e		EtatVentillation = Etat_INACTIF;
 Etat_e		EtatChauffage = Etat_INACTIF;
 float		Temperature = 0;
@@ -115,13 +117,13 @@ void LifeBit_Main()
 	{
 		if (Etat == Etat_INACTIF)
 		{
-			TSW_Start(&Tmr_LifeBit, 10);
+			TSW_Start(&Tmr_LifeBit, 100);
 			Etat = Etat_ACTIF;
 			//_CONSOLE(LogId, "lb\n");
 		}
 		else
 		{
-			TSW_Start(&Tmr_LifeBit, 990);
+			TSW_Start(&Tmr_LifeBit, 900);
 			Etat = Etat_INACTIF;
 		}
 
@@ -153,6 +155,8 @@ int main(void)
 
 	_CONSOLE(0, "\n");
 	_CONSOLE(LogId, "--- START - ALJ%s ---\n", VERSION_SW);
+
+	//AM23xx_Test();
 
 	REGLAGE_RTC();
 
@@ -336,24 +340,29 @@ int main(void)
 					GPIO_Set(PORT_IHM_LED2, Etat_INACTIF);
 					GPIO_Set(PORT_IHM_LED3, Etat_INACTIF);
 
-					EtatVentillation = Etat_INACTIF;
-					EtatChauffage = Etat_INACTIF;
+					EtatVentillation	= Etat_INACTIF;
+					EtatChauffage		= Etat_INACTIF;
+
+					TSW_Start(&Tmr_ATTENTE, 1000 * 30); // On reste au moins 30sec en mode attente
 				}
 
-				if ((TSW_IsRunning(&Tmr_EXT) == FALSE)
-				&&	(TSW_IsRunning(&Tmr_CH) == FALSE))
+				if (TSW_IsRunning(&Tmr_ATTENTE) == TRUE)
 				{
-					// Pas de chauffage dessuite après l'extraction
-					if (Temperature < Chauffage_Get()->Cfg_SeuilStart_DegC)
-					{
-						Mode = MODE_CHAUFFAGE;
-					}
+					break;
+				}
 
-					// Pas d'extraction dessuite après le chauffage
-					if (Temperature >= Ventilation_Get()->Cfg_SeuilStart_DegC)
-					{
-						Mode = MODE_VENTILLATION;
-					}
+				// Pas de chauffage dessuite après l'extraction
+				if ((TSW_IsRunning(&Tmr_EXT) == FALSE)
+				&&	(Temperature < Chauffage_Get()->Cfg_SeuilStart_DegC))
+				{
+					Mode = MODE_CHAUFFAGE;
+				}
+
+				// Pas d'extraction dessuite après le chauffage
+				if ((TSW_IsRunning(&Tmr_CH) == FALSE)
+				&&	(Temperature >= Ventilation_Get()->Cfg_SeuilStart_DegC))
+				{
+					Mode = MODE_VENTILLATION;
 				}
 
 				break;
@@ -431,14 +440,22 @@ int main(void)
 					EtatChauffage		= Etat_INACTIF;
 					//Arrosage_Stop();
 
-					TSW_Start(&Tmr_DEFAULT, 60000);
+					TSW_Start(&Tmr_DEFAULT, 60 * 1000);
+					TSW_Start(&Tmr_DEFAULT_Max, 600 * 1000);
 				}
 
-				if (TSW_IsRunning(&Tmr_DEFAULT) == FALSE)
+				if (TempHygro_IsValide() == TRUE)
+				{
+					Mode = MODE_VENTILLATION;
+					break;
+				}
+
+				if ((TSW_IsRunning(&Tmr_DEFAULT) == FALSE)
+				&&	(REBOOT_ON_DEFAULT_MODE == TRUE)
+				&&	(Arrosage_IsActive() == FALSE))
 				{
 					if ((Telnet_GetNbActiveConnection() == 0)
-					&&	(REBOOT_ON_DEFAULT_MODE == TRUE)
-					&&	(Arrosage_IsActive() == FALSE))
+					||	(TSW_IsRunning(&Tmr_DEFAULT_Max) == FALSE))
 					{
 						_CONSOLE(LogId, "REBOOT...\n");
 						TSW_Delay(5000);
@@ -456,13 +473,13 @@ int main(void)
 		{
 			_CONSOLE(LogId, "Ventillation = %d\n", EtatVentillation);
 			GPIO_Set(PORT_RELAIS_V_EXT, EtatVentillation);
-			//LogData();
+			Logs_Data();
 		}
 		if (GPIO_Get(PORT_RELAIS_CH) != EtatChauffage)
 		{
 			_CONSOLE(LogId, "Chauffage = %d\n", EtatChauffage);
 			GPIO_Set(PORT_RELAIS_CH, EtatChauffage);
-			//LogData();
+			Logs_Data();
 		}
 	}
 
