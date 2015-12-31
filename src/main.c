@@ -46,7 +46,7 @@
 	EXPORTED VARIABLES
 --------------------------------------------------------------------------------------------------*/
 
-const char VERSION_SW[] = {"00001AAK"};
+const char VERSION_SW[] = {"00001AAL"};
 
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...

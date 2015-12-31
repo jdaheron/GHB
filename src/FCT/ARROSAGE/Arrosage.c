@@ -141,12 +141,12 @@ void Arrosage_LaunchDbg(void)
 
 	RTC_Lire(&Time);
 
-	if (	((Time.Mois == JANVIER) && (Time.Jour == 31))
-		||	((Time.Mois == FEVRIER) && (Time.Jour ==  4))
-		||	((Time.Mois == FEVRIER) && (Time.Jour ==  8))
-		||	((Time.Mois == FEVRIER) && (Time.Jour == 12))
-		||	((Time.Mois == FEVRIER) && (Time.Jour == 16))
-		||	((Time.Mois == FEVRIER) && (Time.Jour == 20))	)
+	if (	((Time.Mois == DECEMBRE) && (Time.Jour == 31))
+		||	((Time.Mois == JANVIER) && (Time.Jour ==  4))
+		||	((Time.Mois == JANVIER) && (Time.Jour ==  8))
+		||	((Time.Mois == JANVIER) && (Time.Jour == 12))
+		||	((Time.Mois == JANVIER) && (Time.Jour == 16))
+		||	((Time.Mois == JANVIER) && (Time.Jour == 20))	)
 	{
 		if ((Time.Heure == 9)
 		&&	(Time.Minute < 10))
