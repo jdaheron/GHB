@@ -55,7 +55,7 @@ static Arrosage_t This =
 
 
 /*------------------------------------------------------------------------------------------------*/
-void Arrosage_Init(void)
+void Arrosage_Init(Bool_e UseConfIni)
 {
 	Arrosage_t TmpThis;
 	Status_e ReadStatus;
@@ -87,7 +87,7 @@ void Arrosage_Init(void)
 	//------------------------------------------------------
 	// Comparaison avec fichier ini
 	//------------------------------------------------------
-	if (ConfIni_Get()->IsValide == TRUE)
+	if ((ConfIni_Get()->IsValide == TRUE) && (UseConfIni == TRUE))
 	{
 		_CONSOLE(LogId, "Check SD cfg\n");
 
@@ -125,7 +125,7 @@ void Arrosage_Init(void)
 	_CONSOLE(LogId, "TS_Precedent        = %d\n",	This.TS_Precedent			);
 	_CONSOLE(LogId, "TS_Suivant          = %d\n",	This.TS_Suivant				);
 
-	This.GPIO = PORT_RELAIS_OPT1;
+	This.GPIO = PORT_RELAIS_OPT2;
 	This.Etat = Etat_INACTIF;
 	This.Cfg_SaveNeeded = FALSE;
 
@@ -141,20 +141,21 @@ void Arrosage_LaunchDbg(void)
 
 	RTC_Lire(&Time);
 
-	if (	((Time.Mois == DECEMBRE) && (Time.Jour == 31))
+/*	if (	((Time.Mois == DECEMBRE) && (Time.Jour == 31))
 		||	((Time.Mois == JANVIER) && (Time.Jour ==  4))
 		||	((Time.Mois == JANVIER) && (Time.Jour ==  8))
 		||	((Time.Mois == JANVIER) && (Time.Jour == 12))
 		||	((Time.Mois == JANVIER) && (Time.Jour == 16))
 		||	((Time.Mois == JANVIER) && (Time.Jour == 20))	)
 	{
-		if ((Time.Heure == 9)
-		&&	(Time.Minute < 10))
+	*/
+		if ((Time.Heure == 21)
+		&&	(Time.Minute == 00))
 		{
 			This.Cfg_NbPlants = 2;
-			Arrosage_Start(1100);
+			Arrosage_Start(200);
 		}
-	}
+	//}
 }
 
 /*------------------------------------------------------------------------------------------------*/

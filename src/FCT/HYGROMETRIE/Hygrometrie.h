@@ -1,11 +1,11 @@
 /**************************************************************************************************/
 /*																								  */
-/* Gestion de l'arrosage																		  */
+/* Gestion de l'hygrometrie																	  */
 /*																								  */
 /**************************************************************************************************/
 
-#ifndef ARROSAGE_H_
-#define ARROSAGE_H_
+#ifndef HYGROMETRIE_H_
+#define HYGROMETRIE_H_
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -28,38 +28,26 @@
 typedef struct
 {
 	Bool_e 			Cfg_Restored;
-	Bool_e 			Cfg_SaveNeeded;
-	char			Cfg_Heure[8];
-	uint32_t		Cfg_Intervalle_h;
-	uint32_t		Cfg_VolumeParPlant_ml;
-	uint32_t		Cfg_NbPlants;
-	uint32_t		Cfg_DebitPompe_ml_par_h;
-	uint32_t		Cfg_VolumeReservoir_ml;
-
-	uint32_t		VolumeRestant_ml;
-	uint32_t		TS_Precedent;
-	uint32_t		TS_Suivant;
+	uint32_t		Cfg_SeuilStop_Deg;
+	uint32_t		Cfg_SeuilStart_Deg;
+	uint32_t		Cfg_TempoApresProd_s;
 
 	TSW_s			TmrMngt;
-	TSW_s			TmrActif;
+	TSW_s			TmrTempo;
 
 	MappingGpio_e	GPIO;
 	Etat_e			Etat;
 
-} Arrosage_t;
+} Hygrometrie_t;
 
 
 /*--------------------------------------------------------------------------------------------------
 	PUBLIC FUNCTION PROTOTYPE
 --------------------------------------------------------------------------------------------------*/
 
-void 		Arrosage_Init(Bool_e UseConfIni);
-void		Arrosage_Management(void);
-uint32_t	Arrosage_Start(uint32_t VolumeParPlant_ml);
-void		Arrosage_Stop(void);
-void		Arrosage_SetVolumeReservoir(uint32_t VolumeReservoirRestant_ml);
-Bool_e		Arrosage_IsActive(void);
-Arrosage_t*	Arrosage_Get(void);
+void 			Hygrometrie_Init(Bool_e UseConfIni);
+void			Hygrometrie_Management(void);
+Hygrometrie_t*	Hygrometrie_Get(void);
 
 
-#endif /* ARROSAGE_H_ */
+#endif /* HYGROMETRIE_H_ */

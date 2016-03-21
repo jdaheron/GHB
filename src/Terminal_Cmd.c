@@ -10,15 +10,19 @@
 --------------------------------------------------------------------------------------------------*/
 
 #include "Terminal.h"
+#include "Terminal_Cmd.h"
 
 #include <FILES/FatFs/ff.h>
 #include "util_TSW.h"
 #include "util_printf.h"
+#include "util_Conversions.h"
 #include "Arrosage.h"
 #include "Chauffage.h"
 #include "Ethernet.h"
+#include "Hygrometrie.h"
 #include "Ventilation.h"
 #include "Modes.h"
+#include "fct_MemoireFAT.h"
 
 
 /*--------------------------------------------------------------------------------------------------
@@ -390,7 +394,7 @@ void Cmd_Status(char* bufferIn, pSendResponse_f Terminal_Write)
 
 	memset(day, 0, 10);
 	strncpy(day, RTC_GetDayString(Time.JourSemaine, 3), 3);
-	_sprintf(tmpBuffer, "%s %02d %02d %d %02d %02d %02d %08d %d %d %d %d %d.%d %d.%d %f %f",
+	_sprintf(tmpBuffer, "%s %02d %02d %d %02d %02d %02d %08d %d %d %d %d %d %d.%d %d.%d",
 			day, Time.Jour, Time.Mois, Time.Annee,
 			Time.Heure, Time.Minute, Time.Seconde,
 			TSW_GetTimestamp_ms(),
@@ -398,12 +402,11 @@ void Cmd_Status(char* bufferIn, pSendResponse_f Terminal_Write)
 			EtatVentillation,
 			EtatChauffage,
 			Arrosage_Get()->Etat,
+			Hygrometrie_Get()->Etat,
 			(uint16_t) Temperature,
 			(uint16_t) (Temperature * 10) % 10,
 			(uint16_t) Hygrometrie,
-			(uint16_t) (Hygrometrie * 10) % 10,
-			Temperature,
-			Hygrometrie
+			(uint16_t) (Hygrometrie * 10) % 10
 	);
 
 	Terminal_Write(tmpBuffer);

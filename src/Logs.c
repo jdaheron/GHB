@@ -17,6 +17,7 @@
 
 #include "Modes.h"
 #include "Arrosage.h"
+#include "Hygrometrie.h"
 #include "fct_TempHygro.h"
 #include "ConfIni.h"
 
@@ -52,7 +53,7 @@ static TSW_s	Tmr_LOG;
 /*------------------------------------------------------------------------------------------------*/
 void Logs_Init(void)
 {
-	LogFile_Write("", 0, "Mode;Ventillation;Chauffage;Arrosage;Temperature;Hygrometrie");
+	LogFile_Write("", 0, "Mode;EtatVentillation;EtatChauffage;EtatArrosage;EtatHygrometrie;Temperature;Hygrometrie");
 }
 
 
@@ -66,16 +67,16 @@ void Logs_Data(void)
 	// Mode, Temperature
 	if (TempHygro_IsValide() == FALSE)
 	{
-		_sprintf(LogBuffer, "%d;%d;%d;%d;%d,%d;%;%d,%d;",
-				Mode, EtatVentillation, EtatChauffage, Arrosage_Get()->Etat,
+		_sprintf(LogBuffer, "%d;%d;%d;%d;%d;%d,%d;%;%d,%d;",
+				Mode, EtatVentillation, EtatChauffage, Arrosage_Get()->Etat, Hygrometrie_Get()->Etat,
 				-100, 0,
 				-100, 0
 		);
 	}
 	else
 	{
-		_sprintf(LogBuffer, "%d;%d;%d;%d;%d,%d;%;%d,%d;",
-				Mode, EtatVentillation, EtatChauffage, Arrosage_Get()->Etat,
+		_sprintf(LogBuffer, "%d;%d;%d;%d;%d;%d,%d;%;%d,%d;",
+				Mode, EtatVentillation, EtatChauffage, Arrosage_Get()->Etat, Hygrometrie_Get()->Etat,
 				(uint16_t) Temperature,
 				(uint16_t) (Temperature * 10) % 10,
 				(uint16_t) Hygrometrie,
@@ -88,7 +89,8 @@ void Logs_Data(void)
 
 	if ((Mode == MODE_CHAUFFAGE)
 	||	(Mode == MODE_VENTILLATION)
-	||	(Arrosage_Get()->Etat == Etat_ACTIF))
+	||	(Arrosage_Get()->Etat == Etat_ACTIF)
+	||	(Hygrometrie_Get()->Etat == Etat_ACTIF))
 	{
 		TSW_Start(&Tmr_LOG, 1000 * LOG_DELAI_PENDANT_ACTION_s);
 	}

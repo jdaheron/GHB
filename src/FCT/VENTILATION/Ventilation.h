@@ -39,7 +39,7 @@ typedef struct
 	PUBLIC FUNCTION PROTOTYPE
 --------------------------------------------------------------------------------------------------*/
 
-void 			Ventilation_Init(void);
+void 			Ventilation_Init(Bool_e UseConfIni);
 void			Ventilation_Management(void);
 Ventilation_t*	Ventilation_Get(void);
 

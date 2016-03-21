@@ -86,25 +86,31 @@ static DatabaseEeprom_s DatabaseEeprom[NB_DatabaseEeprom] = {
 
 		// DatabaseEeprom_Arrosage
 		{
-				.StartAddress	= 0,	// (Size 128 octets)
+				.StartAddress	= 0,		// (Size 128 octets)
 				.UseBkp			= FALSE,
 		},
 
 		// DatabaseEeprom_Chauffage
 		{
-				.StartAddress	= 128,	 // (Size 64 octets)
+				.StartAddress	= 128,	 	// (Size 128 octets)
 				.UseBkp			= FALSE,
 		},
 
-		// DatabaseEeprom_Ethernet		 // (Size 64 octets)
+		// DatabaseEeprom_Ethernet		 	// (Size 64 octets)
 		{
 				.StartAddress	= 192,
 				.UseBkp			= FALSE,
 		},
 
-		// DatabaseEeprom_Ventilation	// (Size 64  octets)
+		// DatabaseEeprom_Ventilation		// (Size 64  octets)
 		{
 				.StartAddress	= 256,
+				.UseBkp			= FALSE,
+		},
+
+		// DatabaseEeprom_Hygrometrie		// (Size 64  octets)
+		{
+				.StartAddress	= 320,
 				.UseBkp			= FALSE,
 		},
 };

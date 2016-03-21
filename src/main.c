@@ -31,6 +31,7 @@
 #include "Arrosage.h"
 #include "Chauffage.h"
 #include "Ethernet.h"
+#include "Hygrometrie.h"
 #include "Ventilation.h"
 
 #include "Telnet.h"
@@ -46,7 +47,7 @@
 	EXPORTED VARIABLES
 --------------------------------------------------------------------------------------------------*/
 
-const char VERSION_SW[] = {"00001AAL"};
+const char VERSION_SW[] = {"00001AAM"};
 
 // Definition de l'offset d'execution en fonction de l'option de compilation
 // Modifier aussi le script du linker...
@@ -63,6 +64,7 @@ const char VERSION_SW[] = {"00001AAL"};
 
 #define LogId								"MAIN"
 
+#define USE_CONF_INI_FILE					FALSE
 #define REBOOT_ON_DEFAULT_MODE				TRUE
 #define MAIN_CONSOLE_ENABLE					1
 #define USE_ETHERNET_AND_USB				1
@@ -170,9 +172,9 @@ int main(void)
 
 //	Hygrometre_Init();
 	ConfIni_Init();
-	Arrosage_Init();
-	Chauffage_Init();
-	Ventilation_Init();
+	Arrosage_Init(USE_CONF_INI_FILE);
+	Chauffage_Init(USE_CONF_INI_FILE);
+	Ventilation_Init(USE_CONF_INI_FILE);
 	Logs_Init();
 
 	PC_Init();
@@ -182,7 +184,7 @@ int main(void)
 	//_CONSOLE(LogId, "MODE_FCT_SERVEUR\n");
 	ModeFct = MODE_FCT_SERVEUR;
 	//MemoireFAT_PrintFileList("httpserver");
-	Ethernet_Init();
+	Ethernet_Init(USE_CONF_INI_FILE);
 
 	if (RTC_BkpRegister_Read(0) != 0)
 	{
@@ -244,6 +246,7 @@ int main(void)
 			Arrosage_Management();
 			Chauffage_Management();
 			Ventilation_Management();
+			Hygrometrie_Management();
 		}
 
 		if (ModeFct == MODE_FCT_SERVEUR)
@@ -388,7 +391,7 @@ int main(void)
 				}
 
 				// Attente franchissement seuil
-				if (Temperature >= Chauffage_Get()->Cfg_SeuilStop_DegC)
+			if (Temperature >= Chauffage_Get()->Cfg_SeuilStop_DegC)
 				{
 					EtatChauffage = Etat_INACTIF;
 
@@ -458,6 +461,7 @@ int main(void)
 					||	(TSW_IsRunning(&Tmr_DEFAULT_Max) == FALSE))
 					{
 						_CONSOLE(LogId, "REBOOT...\n");
+						MemoireFAT_DeInit();
 						TSW_Delay(5000);
 						GOTO(0);
 						Mode = MODE_DEMARRAGE;

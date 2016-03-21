@@ -61,7 +61,7 @@ static Ethernet_t This =
 
 
 /*------------------------------------------------------------------------------------------------*/
-void Ethernet_Init(void)
+void Ethernet_Init(Bool_e UseConfIni)
 {
 	Ethernet_t TmpThis;
 	Status_e ReadStatus;
@@ -92,7 +92,7 @@ void Ethernet_Init(void)
 	//------------------------------------------------------
 	// Comparaison avec fichier ini
 	//------------------------------------------------------
-	if (ConfIni_Get()->IsValide == TRUE)
+	if ((ConfIni_Get()->IsValide == TRUE) && (UseConfIni == TRUE))
 	{
 		_CONSOLE(LogId, "Check SD cfg\n");
 

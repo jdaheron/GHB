@@ -46,7 +46,7 @@ static Chauffage_t This =
 
 
 /*------------------------------------------------------------------------------------------------*/
-void Chauffage_Init(void)
+void Chauffage_Init(Bool_e UseConfIni)
 {
 	Chauffage_t TmpThis;
 	Status_e ReadStatus;
@@ -78,7 +78,7 @@ void Chauffage_Init(void)
 	//------------------------------------------------------
 	// Comparaison avec fichier ini
 	//------------------------------------------------------
-	if (ConfIni_Get()->IsValide == TRUE)
+	if ((ConfIni_Get()->IsValide == TRUE) && (UseConfIni == TRUE))
 	{
 		_CONSOLE(LogId, "Check SD cfg\n");
 

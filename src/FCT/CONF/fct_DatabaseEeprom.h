@@ -49,6 +49,7 @@ typedef enum
 	DatabaseEeprom_Chauffage,
 	DatabaseEeprom_Ethernet,
 	DatabaseEeprom_Ventilation,
+	DatabaseEeprom_Hygrometrie,
 	NB_DatabaseEeprom
 
 } DatabaseEeprom_Data_e;

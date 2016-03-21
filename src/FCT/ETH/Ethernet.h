@@ -69,7 +69,7 @@ typedef struct
 	PUBLIC FUNCTION PROTOTYPE
 --------------------------------------------------------------------------------------------------*/
 
-void 		Ethernet_Init(void);
+void 		Ethernet_Init(Bool_e UseConfIni);
 void		Ethernet_Management(void);
 Ethernet_t*	Ethernet_Get(void);
 

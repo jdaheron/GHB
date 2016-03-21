@@ -38,7 +38,7 @@ typedef struct
 	PUBLIC FUNCTION PROTOTYPE
 --------------------------------------------------------------------------------------------------*/
 
-void 			Chauffage_Init(void);
+void 			Chauffage_Init(Bool_e UseConfIni);
 void			Chauffage_Management(void);
 Chauffage_t*	Chauffage_Get(void);
 
